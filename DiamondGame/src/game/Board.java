@@ -78,6 +78,18 @@ public class Board {
 		// x=12
 		mSpots[12][3][3]=new Spot(TeamColor.RED);
 
+		// Spotクラスに座標を登録する
+		for(int x=0; x<13; x++){
+			for(int y=0; y<13; y++){
+				for(int z=0; z<13; z++){
+					Spot spot = mSpots[x][y][z];
+					if(spot != null){
+						spot.setCoordinate(x, y, z);
+					}
+				}
+			}
+		}
+
 	}
 
 	public void placePiece() {
@@ -103,25 +115,31 @@ public class Board {
 		return true;
 	}
 
-}
+	public class Spot{
+		Piece     mPiece;
+		TeamColor mTeam;
+		int       mX, mY, mZ;
+		public Spot() {
+			mTeam  = null;
+			mPiece = null;
+		}
+		public Spot(TeamColor team, Piece piece) {
+			mTeam  = team;
+			mPiece = piece;
+		}
+		public Spot(TeamColor team) {
+			mTeam  = team;
+			mPiece = null;
+		}
+		public Spot(Piece piece) {
+			mTeam  = null;
+			mPiece = piece;
+		}
+		public void setCoordinate(int x, int y, int z){
+			mX = x;
+			mY = y;
+			mZ = z;
+		}
+	}
 
-class Spot{
-	Piece     mPiece;
-	TeamColor mTeam;
-	public Spot() {
-		mTeam  = null;
-		mPiece = null;
-	}
-	public Spot(TeamColor team, Piece piece) {
-		mTeam  = team;
-		mPiece = piece;
-	}
-	public Spot(TeamColor team) {
-		mTeam  = team;
-		mPiece = null;
-	}
-	public Spot(Piece piece) {
-		mTeam  = null;
-		mPiece = piece;
-	}
 }

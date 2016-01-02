@@ -1,7 +1,11 @@
 package game;
 
-import common.Direction;
+import java.util.ArrayList;
+import java.util.List;
+
 import common.TeamColor;
+import game.UserBoard.UserPiece;
+import game.UserBoard.UserSpot;
 import user.User;
 
 public class Move {
@@ -11,17 +15,12 @@ public class Move {
 	/**
 	 * どの駒を
 	 */
-	public  Piece          mPiece;
+	public  UserPiece mPiece;
 
 	/**
-	 * どの方向に
+	 * どう進めるか(配列)
 	 */
-	public  Direction      mDirection;
-
-	/**
-	 * 何マス進めるか
-	 */
-	public  int            mDistance;
+	public List<UserSpot> mMoveSpots;
 
 	public User getmUser() {
 		return mUser;
@@ -34,6 +33,7 @@ public class Move {
 	public Move(User user) {
 		mUser = user;
 		mTeam = user.getMyTeam();
+		mMoveSpots = new ArrayList<>();
 	}
 
 }
