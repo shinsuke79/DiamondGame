@@ -73,7 +73,7 @@ public class GameMaster implements Runnable {
 		// 現在のユーザーに出番を通知する
 		mMove      = new Move(user);
 		mWaitCount = 0;
-		user.say(UserMessage.YOUR_TERN, this, mGame.getUserBoard(), mMove);
+		user.say(UserMessage.YOUR_TERN, this, mGame.getUserBoard(user), mMove);
 
 		// ユーザーからのコールバック待ちに遷移する
 		mState = State.WAIT_CALLBACK;
@@ -151,18 +151,35 @@ public class GameMaster implements Runnable {
 		}
 	}
 
+	/**
+	 * ゲームが継続可能かチェック
+	 * @return ゲームが継続可能ならtrueを返す
+	 */
 	private boolean judgeContinueGame() {
-		// TODO 自動生成されたメソッド・スタブ
-		return true;
+		return mGame.getGoalTeams().size() < 2;
 	}
 
 	private void updateStatus() {
-		// TODO 自動生成されたメソッド・スタブ
+		// ゴールしたチームの更新
+		updateGoalTeams();
 	}
 
-	private boolean checkMove(Move mMove2) {
-		// TODO Moveが正しい値か確認
-		return true;
+	private void updateGoalTeams() {
+		for(TeamColor tc : TeamColor.values()){
+			// ゴール済みであるにも関わらず、ゴールチーム一覧に含まれていない場合
+			if(mGame.getBoard().isFinishedTeam(tc) && !mGame.getGoalTeams().contains(tc)){
+				mGame.getGoalTeams().add(tc);
+			}
+		}
+	}
+
+	/**
+	 * 指定されたMoveが正しいか確認します
+	 * @param move
+	 * @return
+	 */
+	private boolean checkMove(Move move) {
+		return mGame.getBoard().isMoveValid(move);
 	}
 
 	public void setGame(Game game) {
