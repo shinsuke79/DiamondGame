@@ -1,0 +1,2 @@
+# DiamondGame
+ダイアモンドゲーム
