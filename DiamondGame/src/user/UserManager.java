@@ -3,15 +3,18 @@ package user;
 import java.util.ArrayList;
 import java.util.List;
 
+import common.DGLog;
 import common.TeamColor;
 import game.Move;
 import game.UserBoard;
 
 public class UserManager {
 	ArrayList<UserInfo> mUsers;
+	DGLog mLog;
 
 	public UserManager(){
 		mUsers = new ArrayList<>();
+		mLog   = new DGLog("UserManager");
 	}
 
 	public void load() {
@@ -32,6 +35,13 @@ public class UserManager {
 			}
 			@Override
 			protected void think(UserBoard userBoard, Move moveResult) {
+				try {
+					// int rondomTime = (int)(Math.random()*1000);
+					int rondomTime = 3000;
+					mLog.info("think wait %dMsec", rondomTime);
+					Thread.sleep(rondomTime);
+				} catch (InterruptedException e) {
+				}
 			}
 			@Override
 			public void handShake(User handShakeUser, TeamColor teamColor) {

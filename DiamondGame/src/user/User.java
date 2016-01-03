@@ -40,21 +40,20 @@ public abstract class User implements Runnable {
 	public final void run() {
 		mLog.fine("start UserThread ");
 		try {
-			while(!mState.equals(State.TERMINATE)){
+			while(!getState().equals(State.TERMINATE)){
 				stateControl();
 				if(!getState().equals(State.TERMINATE)){
 					Thread.sleep(WAIT_MSEC);
 				}
 			}
-		} catch (InterruptedException e) {
-				e.printStackTrace();
+		} catch (InterruptedException | ThreadDeath e) {
 				mState = State.TERMINATE;
 		}
 	}
 
 	private final void stateControl() {
 		mLog.fine("stateControl state:%s", mState.name());
-		switch(mState){
+		switch(getState()){
 		case WAIT_TERN:
 			procInWaitMyTern();
 			break;
@@ -69,10 +68,10 @@ public abstract class User implements Runnable {
 	private final void procInThinking() {
 		mLog.info("call Think");
 		think(mUserBoard, mMove);
+		setState(State.TERMINATE);
 		mGameMaster.say(GameMasterMessage.FINISHED, this);
 		mUserBoard = null;
 		mMove      = null;
-		mState     = State.TERMINATE;
 	}
 
 	protected abstract void think(UserBoard userBoard, Move moveResult);
@@ -127,9 +126,9 @@ public abstract class User implements Runnable {
 	}
 
 	public final synchronized void stopThinking() {
-		setState(State.TERMINATE);
 		assert mThread != null;
-		if(mThread.isAlive()){
+		if(mThread.isAlive() && !mState.equals(State.TERMINATE)){
+			setState(State.TERMINATE);
 			mLog.warning("stopThinking");
 			mThread.interrupt();
 			mThread.stop(); // AI作成者にフラグをチェックしてもらうわけにはいかないのでこいつで止める
