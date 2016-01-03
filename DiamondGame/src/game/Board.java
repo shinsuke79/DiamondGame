@@ -96,7 +96,12 @@ public class Board {
 		createBaseBoard();
 	}
 
-	public void movePiece(Move mMove) {
+	public void movePiece(Move move) {
+		// 移動が打倒であることの確認
+		if(isMoveValid(move)){
+			// 駒の移動
+
+		}
 	}
 
 	public int getTeamPoint(TeamColor teamColor) {
@@ -112,6 +117,10 @@ public class Board {
 	}
 
 	public boolean isMoveValid(Move move) {
+		// 動かす駒がTeamColorに一致していることの確認
+		// UserPieceをPieceに変換
+		// すべてのUserSpotをSpotに変換
+		// すべてのSpotに移動可能か確認する
 		return true;
 	}
 
