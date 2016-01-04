@@ -1,5 +1,7 @@
 package common;
 
+import game.Board.Cordinate;
+
 public enum Direction {
 	RIGHT_FRONT(0), // ↗
 	RIGHT(1),       // →
@@ -51,6 +53,11 @@ public enum Direction {
 				return d;
 			}
 		}
+		return null;
+	}
+
+	public Cordinate getMovedCordinate(Cordinate mCordinate, int distance) {
+		// TODO 自動生成されたメソッド・スタブ
 		return null;
 	}
 }

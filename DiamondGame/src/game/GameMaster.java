@@ -126,7 +126,7 @@ public class GameMaster implements Runnable {
 
 		// ボードの駒を動かす
 		Board board = mGame.getBoard();
-		board.movePiece(mMove);
+		board.move(mMove);
 
 		// ボードの状態をゲームに反映させる
 		updateStatus();
