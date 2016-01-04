@@ -56,8 +56,55 @@ public enum Direction {
 		return null;
 	}
 
-	public Cordinate getMovedCordinate(Cordinate mCordinate, int distance) {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
+	/**
+	 * 指定された方角へdistance移動させた座標を返却する
+	 * @param cordinate
+	 * @param distance
+	 * @return
+	 */
+	public Cordinate getMovedCordinate(Cordinate cordinate, int distance) {
+		assert distance == 2 || distance == 1;
+		Cordinate result = cordinate.clone();
+
+		int dx=0, dy=0, dz=0;
+
+		switch(this){
+		case RIGHT_FRONT:
+			dx = distance;
+			dy = -distance;
+			dz = 0;
+			break;
+		case RIGHT:
+			dx = 0;
+			dy = -distance;
+			dz = distance;
+			break;
+		case RIGHT_REAR:
+			dx = -distance;
+			dy = 0;
+			dz = distance;
+			break;
+		case LEFT_REAR:
+			dx = -distance;
+			dy = distance;
+			dz = 0;
+			break;
+		case LEFT:
+			dx = 0;
+			dy = distance;
+			dz = -distance;
+			break;
+		case LEFT_FRONT:
+			dx = distance;
+			dy = 0;
+			dz = -distance;
+			break;
+		}
+
+		result.x += dx;
+		result.y += dy;
+		result.z += dz;
+
+		return result;
 	}
 }

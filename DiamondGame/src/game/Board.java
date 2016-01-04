@@ -435,13 +435,24 @@ public class Board {
 	 * @author 0000140105
 	 *
 	 */
-	public class Cordinate {
-		int x, y, z;
+	public class Cordinate implements Cloneable {
+		public int x, y, z;
 		public Cordinate(int x, int y, int z) {
 			this.x = x;
 			this.y = y;
 			this.z = z;
 		}
+
+		@Override
+		public Cordinate clone() {
+			try {
+				return (Cordinate)super.clone();
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+
 		public void setCordinate(int x, int y, int z) {
 			this.x = x;
 			this.y = y;
