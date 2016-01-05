@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import common.Direction;
 import common.TeamColor;
 
-public class Board {
+public class Board implements Cloneable {
 	/**
 	 * x, y, z
 	 */
@@ -20,6 +20,15 @@ public class Board {
 	Piece[] mGreenPieces;
 
 	public Board() {
+	}
+
+	protected Board clone(){
+		try {
+			return (Board)super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/**
@@ -167,9 +176,13 @@ public class Board {
 		return getTeamPoint(teamColor) == 10;
 	}
 
+	/**
+	 * 指定されたチームの視点のUserBoardを提供する
+	 * @param myTeam
+	 * @return
+	 */
 	public UserBoard getUserBoard(TeamColor myTeam) {
-		// TODO これ大変
-		return new UserBoard();
+		return new UserBoard(myTeam, this);
 	}
 
 	/**
