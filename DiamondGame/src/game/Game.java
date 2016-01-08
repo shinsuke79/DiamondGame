@@ -7,6 +7,7 @@ import java.util.Map;
 import common.DGLog;
 import common.TeamColor;
 import user.User;
+import user.humanUser.HumanUser;
 import view.UserInterface;
 
 /**
@@ -62,7 +63,7 @@ public class Game {
 	 */
 	public void setUserInterface(UserInterface ui) {
 		assert ui != null;
-		mLog.info("assignGameMaster %s", ui.getClass().getName());
+		mLog.info("setUserInterface %s", ui.getClass().getName());
 		mUI = ui;
 	}
 
@@ -73,10 +74,24 @@ public class Game {
 		mLog.info("prepareGame start");
 		mGoalTeams = new ArrayList<>();
 
+		/* Game層で行なうべき処理 */
+		editUser();
+
 		/* あとはゲームマスターが準備する */
 		mGameMaster.prepareGame();
 
 		mLog.info("prepareGame end");
+	}
+
+	/**
+	 * ユーザーに関わる情報を調節します
+	 */
+	private void editUser() {
+		// HumanUserに限り、UIクラスを設定する
+		mUsers.values().stream().filter((u)-> u instanceof HumanUser).forEach((u)->{
+			mLog.info("set UI to User#%h ", u);
+			((HumanUser)u).setUserInterface(mUI);
+		});;
 	}
 
 	/* ボードを作成する */

@@ -32,7 +32,8 @@ public abstract class User implements Runnable {
 		mGameMaster = null;
 		mThread = null;
 		mState  = State.INIT;
-		mLog    = new DGLog(User.class.getSimpleName());
+		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
+		mLog.info("Create " + getClass().getSimpleName());
 		mUserInfo = userInfo;
 	}
 
@@ -105,7 +106,7 @@ public abstract class User implements Runnable {
 	}
 
 	public final void say(UserMessage message, GameMaster gameMaster, Object... objects){
-		mLog.fine("say %h message:%s gameMaster:%h", this, message.name(), gameMaster);
+		mLog.fine("say message:%s gameMaster:%h", message.name(), gameMaster);
 		assert gameMaster == mGameMaster;
 		if(message.equals(UserMessage.YOUR_TERN)){
 			mIsReceiveYourTern = true;
@@ -117,7 +118,7 @@ public abstract class User implements Runnable {
 	}
 
 	public synchronized final void startThinking() {
-		mLog.fine("startThinking %h", this);
+		mLog.fine("startThinking");
 		mIsReceiveYourTern = false;
 		mUserBoard         = null;
 		mMove              = null;

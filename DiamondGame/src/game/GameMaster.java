@@ -20,7 +20,8 @@ public class GameMaster implements Runnable {
 	private boolean mIsReceiveFinished;
 
 	public GameMaster() {
-		mLog  = new DGLog(getClass().getSimpleName());
+		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
+		mLog.info("Create " + getClass().getSimpleName());
 		mGame = null;
 		mThread = null;
 		mState = State.INIT;
@@ -252,7 +253,7 @@ public class GameMaster implements Runnable {
 	}
 
 	public final synchronized void say(GameMasterMessage message, User caller, Object... objects) {
-		mLog.fine("say %h message:%s calller:%h", this, message.name(), caller);
+		mLog.fine("say message:%s calller:%h", message.name(), caller);
 		if(message.equals(GameMasterMessage.FINISHED)){
 			if(caller == mGame.getCurrentUser() && mState.equals(State.WAIT_CALLBACK)){
 				mIsReceiveFinished = true;

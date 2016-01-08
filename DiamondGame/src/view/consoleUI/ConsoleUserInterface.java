@@ -28,15 +28,18 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 	private GameConfig  mGameConfig;
 	private Game mGame;
 
-	public ConsoleUserInterface(GameManager gameMgr, UserManager userMgr) {
-		assert (gameMgr != null) && (userMgr != null);
-
-		mGameMgr = gameMgr;
-		mUserMgr = userMgr;
+	public ConsoleUserInterface() {
 		mState   = State.INIT;
 		mLog     = new DGLog(this.getClass().getSimpleName());
 		mGameConfig = null;
 		mGame       = null;
+	}
+
+	@Override
+	public void setManager(GameManager gameMgr, UserManager userMgr) {
+		assert (gameMgr != null) && (userMgr != null);
+		mGameMgr = gameMgr;
+		mUserMgr = userMgr;
 	}
 
 	@Override
@@ -262,6 +265,13 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 				mState = State.TERMINATE;
 		}
 	}
+
+	@Override
+	public boolean askHand(UIBoardSpot userHand) {
+		return false;
+	}
+
+
 }
 
 // 　①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑭⑮⑯⑰⑱

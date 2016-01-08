@@ -22,14 +22,18 @@ public class Main {
 	private void start() {
 		mLog.info("*** Start DiamondGame!! since 2016-1-2 ***");
 
-		/* Manager/UIの生成 */
+		/* Managerの生成 */
 		UserManager userMgr = new UserManager();
 		GameManager gameMgr = new GameManager();
-		UserInterface ui    = new ConsoleUserInterface(gameMgr, userMgr);
+
+		/* UIの生成 */
+		UserInterface ui    = new ConsoleUserInterface();
+		ui.setManager(gameMgr, userMgr);
 
 		/* ゲームデータのロード */
 		userMgr.load();
 		gameMgr.load();
+
 
 		/* ゲーム開始(これ以降の操作はUIからとなる) */
 		ui.start();
