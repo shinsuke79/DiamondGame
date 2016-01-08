@@ -81,9 +81,9 @@ public class Game {
 
 	/* ボードを作成する */
 	public void createBoard(){
-		mLog.info("prepareGame start");
+		mLog.info("createBoard start");
 		mBoard = new Board();
-		mLog.info("prepareGame end");
+		mLog.info("createBoard end");
 	}
 
 	/* ゲームをする気持ちになる */

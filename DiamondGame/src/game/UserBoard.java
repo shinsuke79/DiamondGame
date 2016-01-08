@@ -34,6 +34,7 @@ public class UserBoard {
 
 		this.mainTeam     = team;
 		this.boards       = new UserSpot[10][10];
+		this.pieces       = new EnumMap<>(TeamColor.class);
 		for(TeamColor tc: TeamColor.values()){
 			pieces.put(tc, new HashSet<>());
 		}
