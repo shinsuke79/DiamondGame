@@ -45,7 +45,7 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 	}
 
 	private void stateControl() {
-		mLog.fine("stateControl state:%s ", mState.name());
+		// mLog.fine("stateControl state:%s ", mState.name());
 		switch(mState){
 		case INIT:
 			procInInit();
@@ -127,13 +127,33 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		switch(input){
 		case 1:
 			System.out.println("ゲーム開始");
-			mState = State.CONFIG;
+			if(!DGConfig.SmoothDebugOnConsole){
+				mState = State.CONFIG;
+			}else{
+				constructConfig();
+				mState = State.CREATE_GAME;
+			}
 			break;
 		default:
 			System.err.println("入力に誤りがあります");
 			return;
 		}
 
+	}
+
+	/**
+	 * デバッグ用：ユーザー入力をせずにConfigを構築します
+	 */
+	private void constructConfig() {
+		GameConfig config = new GameConfig();
+		config.recordResult = false;
+		config.timeLimitSec = 10000;
+		config.users = new HashMap<TeamColor, UserInfo>();
+		config.users.put(TeamColor.RED, mUserMgr.getAllUsers().get(0));
+		config.users.put(TeamColor.GREEN, mUserMgr.getAllUsers().get(1));
+		config.users.put(TeamColor.YELLOW, mUserMgr.getAllUsers().get(2));
+		mLog.info("config finish %s", config.toString());
+		mGameConfig = config;
 	}
 
 	/**

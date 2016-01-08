@@ -52,7 +52,7 @@ public abstract class User implements Runnable {
 	}
 
 	private final void stateControl() {
-		mLog.fine("stateControl state:%s", mState.name());
+		// mLog.fine("stateControl state:%s", mState.name());
 		switch(getState()){
 		case WAIT_TERN:
 			procInWaitMyTern();
