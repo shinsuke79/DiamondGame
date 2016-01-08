@@ -30,12 +30,12 @@ public enum Direction {
 			relativeNum = mNum;
 			break;
 		case GREEN:
-			// 緑は-2
-			relativeNum = (6+mNum-2)%6;
+			// 緑は+2
+			relativeNum = (6+mNum+2)%6;
 			break;
 		case YELLOW:
-			// 黄は-1
-			relativeNum = (6+mNum-1)%6;
+			// 黄は+4
+			relativeNum = (6+mNum+4)%6;
 			break;
 		}
 		// 新たなnumに該当するDirectionを返却
