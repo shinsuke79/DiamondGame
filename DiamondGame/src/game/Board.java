@@ -397,7 +397,7 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	private boolean checkCordinate(Cordinate cordinate){
-		IntPredicate checker = (c)->(0<c && c<13);
+		IntPredicate checker = (c)->(0<=c && c<=12);
 		boolean result = checker.test(cordinate.x)
 				&& checker.test(cordinate.y)
 				&& checker.test(cordinate.z);
@@ -569,6 +569,7 @@ public class Board implements Cloneable {
 	 */
 	public static class Cordinate implements Cloneable {
 		public int x, y, z;
+		static DGLog Log = new DGLog(Direction.class.getSimpleName());
 		public Cordinate(int x, int y, int z) {
 			this.x = x;
 			this.y = y;
@@ -601,6 +602,7 @@ public class Board implements Cloneable {
 		 * @return
 		 */
 		public Cordinate getMovedCordinate(int distance, Direction direction) {
+			Log.fine("getMovedCordinate this:%s direction:%s distance:%d", this, direction, distance);
 			assert distance == 2 || distance == 1;
 			Cordinate result = this.clone();
 
@@ -643,6 +645,7 @@ public class Board implements Cloneable {
 			result.y += dy;
 			result.z += dz;
 
+			Log.fine("getMovedCordinate result:%s ", result);
 			return result;
 		}
 

@@ -148,11 +148,18 @@ public class UserBoard {
 		void setPiece(UserPiece piece){
 			this.piece = piece;
 		}
+
+		@Override
+		public String toString() {
+			return "UserSpot [baseSpot=" + baseSpot + ", piece=" + piece + ", cordinate=" + cordinate + "]";
+		}
+
 	}
 
 	public static class UserCordinate implements Cloneable{
 		private int x;
 		private int y;
+		static DGLog Log = new DGLog(Direction.class.getSimpleName());
 		public UserCordinate(int x, int y) {
 			this.x = x;
 			this.y = y;
@@ -171,6 +178,7 @@ public class UserBoard {
 		 * @return
 		 */
 		public UserCordinate getMovedCordinate(int distance, Direction direction) {
+			Log.fine("getMovedUserCordinate this:%s direction:%s distance:%d", this, direction, distance);
 			assert distance == 2 || distance == 1;
 
 			int dx=0, dy=0;
@@ -201,8 +209,9 @@ public class UserBoard {
 				dy = 0;
 				break;
 			}
-
-			return new UserCordinate(this.getX()+dx, this.getY()+dy);
+			UserCordinate result = new UserCordinate(this.getX()+dx, this.getY()+dy);
+			Log.fine("getMovedUserCordinate result:%s ", result);
+			return result;
 		}
 		@Override
 		public String toString() {
