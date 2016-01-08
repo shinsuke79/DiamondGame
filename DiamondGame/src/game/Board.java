@@ -304,6 +304,7 @@ public class Board implements Cloneable {
 		// 距離が2なら同方角の目の前にPieceが存在し、nextSpotにPieceが存在しなければ移動可能
 		else if(distance == 2){
 			Spot jumpSpot = getNextSpotUsingDirection(currentSpot, direction, 1);
+			assert jumpSpot != null;
 			boolean result = jumpSpot.mPiece != null && nextSpot.mPiece == null;
 			mLog.fine("isAvailableMove distance=2 result:%b ", result);
 			return result;
@@ -407,12 +408,15 @@ public class Board implements Cloneable {
 
 	/**
 	 * 座標から特定されたSpotを返却する
-	 * @param cordinate
-	 * @return
+	 * @param cordinate(範囲外を許容)
+	 * @return 範囲外の場合nullを返す
 	 */
 	Spot getSpotFromCordinate(Cordinate cordinate) {
-		assert checkCordinate(cordinate);
-		return mSpots[cordinate.x][cordinate.y][cordinate.z];
+		if(checkCordinate(cordinate)){
+			return mSpots[cordinate.x][cordinate.y][cordinate.z];
+		}else{
+			return null;
+		}
 	}
 
 	/**
