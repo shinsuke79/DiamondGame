@@ -29,6 +29,7 @@ public class UserManager {
 	}
 
 	public User createUser(UserInfo userInfo) {
+		// TODO
 		return new User(userInfo) {
 			@Override
 			public void notifyCancelled() {
@@ -37,7 +38,7 @@ public class UserManager {
 			protected void think(UserBoard userBoard, Move moveResult) {
 				try {
 					// int rondomTime = (int)(Math.random()*1000);
-					int rondomTime = 3000;
+					int rondomTime = 300000;
 					mLog.info("think wait %dMsec", rondomTime);
 					Thread.sleep(rondomTime);
 				} catch (InterruptedException e) {

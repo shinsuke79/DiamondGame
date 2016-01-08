@@ -1,7 +1,9 @@
 package game;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import common.DGLog;
@@ -53,7 +55,56 @@ public class UserBoard {
 	}
 
 	public void logConsoleUserBoardImage() {
-		// TODO
+		for(String s: getBoadString()){
+			mLog.info(s);
+		}
+	}
+
+	/**
+	 * [コンソール出力用] 指定されたBoardの状況をコンソール用に生成します
+	 * String.format使えばよかった…
+	 * @return
+	 */
+	public List<String> getBoadString(){
+		List<String> result = new ArrayList<>();
+		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑭⑮⑯⑰⑱"));
+		result.add(String.format("A                   %s                  ", s2cs(6,6)));
+		result.add(String.format("B                 %s  %s                ", s2cs(6,5), s2cs(5,6)));
+		result.add(String.format("C               %s  %s  %s              ", s2cs(6,4), s2cs(5,5), s2cs(4,6)));
+		result.add(String.format("D %s  %s  %s  %s  %s  %s  %s  %s  %s  %s", s2cs(9,0), s2cs(8,1), s2cs(7,2), s2cs(6,3), s2cs(5,4), s2cs(4,5), s2cs(3,6), s2cs(2,7), s2cs(1,8), s2cs(0,9)));
+		result.add(String.format("E   %s  %s  %s  %s  %s  %s  %s  %s  %s  ", s2cs(8,0), s2cs(7,1), s2cs(6,2), s2cs(5,3), s2cs(4,4), s2cs(3,5), s2cs(2,6), s2cs(1,7), s2cs(0,8)));
+		result.add(String.format("F     %s  %s  %s  %s  %s  %s  %s  %s    ", s2cs(7,0), s2cs(6,1), s2cs(5,2), s2cs(4,3), s2cs(3,4), s2cs(2,5), s2cs(1,6), s2cs(0,7)));
+		result.add(String.format("G       %s  %s  %s  %s  %s  %s  %s      ", s2cs(6,0), s2cs(5,1), s2cs(4,2), s2cs(3,3), s2cs(2,4), s2cs(1,5), s2cs(0,6)));
+		result.add(String.format("H         %s  %s  %s  %s  %s  %s        ", s2cs(5,0), s2cs(4,1), s2cs(3,2), s2cs(2,3), s2cs(1,4), s2cs(0,5)));
+		result.add(String.format("I           %s  %s  %s  %s  %s          ", s2cs(4,0), s2cs(3,1), s2cs(2,2), s2cs(1,3), s2cs(0,4)));
+		result.add(String.format("J             %s  %s  %s  %s            ", s2cs(3,0), s2cs(2,1), s2cs(1,2), s2cs(0,3)));
+		result.add(String.format("K               %s  %s  %s              ", s2cs(2,0), s2cs(1,1), s2cs(0,2)));
+		result.add(String.format("L                 %s  %s                ", s2cs(1,0), s2cs(0,1)));
+		result.add(String.format("M                   %s                  ", s2cs(0,0)));
+		return result;
+	}
+
+	/**
+	 * [コンソール出力用] 指定された座標のSpotを一文字の文字列に変換します spot to console string
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	private String s2cs(int x, int y){
+		UserSpot spot = boards[x][y];
+		if(spot == null){
+			return "  ";
+		}else if(spot.piece != null){
+			switch(spot.piece.geTeamColor()){
+			case GREEN:  return "緑";
+			case RED:    return "赤";
+			case YELLOW: return "黄";
+			}
+		}else{
+			return "○";
+		}
+		return "  ";
 	}
 
 	/* -------- Userには公開しないAPI --------  */
