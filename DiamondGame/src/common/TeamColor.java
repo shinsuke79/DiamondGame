@@ -1,10 +1,17 @@
 package common;
 
+import game.Board.Cordinate;
+
 public enum TeamColor {
-	RED("赤チーム"), GREEN("緑チーム"), YELLOW("黃チーム");
+	RED("赤チーム",    new Cordinate(0,9,9)),
+	GREEN("緑チーム",  new Cordinate(9,9,0)),
+	YELLOW("黃チーム", new Cordinate(9,0,9));
+
 	String mName;
-	private TeamColor(String name) {
+	Cordinate rootCordinate;
+	private TeamColor(String name, Cordinate root) {
 		mName = name;
+		rootCordinate = root;
 	}
 	public String getName(){
 		return mName;
@@ -17,5 +24,8 @@ public enum TeamColor {
 		case YELLOW: return RED;
 		}
 		return null;
+	}
+	public Cordinate getRootCordinate() {
+		return rootCordinate;
 	}
 }

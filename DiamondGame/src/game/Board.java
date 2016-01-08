@@ -129,7 +129,7 @@ public class Board implements Cloneable {
 
 		// 座標を更新する
 		Piece piece = move.mPiece.getBasePiece();
-		List<Spot> spots = move.mMoveSpots.stream().map((m)->m.getBaseSpot()).collect(Collectors.toList());
+		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m.getBaseCordinate())).collect(Collectors.toList());
 		Spot currentSpot = getSpotFromPiece(piece);
 		Spot nextSpot    = spots.get(0);
 		while(!spots.isEmpty()){
@@ -193,7 +193,7 @@ public class Board implements Cloneable {
 	public boolean isMoveValid(Move move) {
 		// User型のPiece/Spotを共通型へ変換
 		Piece piece = move.mPiece.getBasePiece();
-		List<Spot> spots = move.mMoveSpots.stream().map((m)->m.getBaseSpot()).collect(Collectors.toList());
+		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m.getBaseCordinate())).collect(Collectors.toList());
 
 		// 動かす駒がTeamColorに一致していることの確認
 		if(piece.getmTeamColor() != move.getmTeam()){
@@ -320,7 +320,7 @@ public class Board implements Cloneable {
 		}
 
 		// 指定された方向の座標を取得する
-		Cordinate newCordinate = direction.getMovedCordinate(spot.mCordinate, distance);
+		Cordinate newCordinate = spot.mCordinate.getMovedCordinate(distance, direction);
 		if(newCordinate == null || !checkCordinate(newCordinate)){
 			return null;
 		}
@@ -346,7 +346,7 @@ public class Board implements Cloneable {
 	 * @param cordinate
 	 * @return
 	 */
-	private Spot getSpotFromCordinate(Cordinate cordinate) {
+	Spot getSpotFromCordinate(Cordinate cordinate) {
 		assert checkCordinate(cordinate);
 		return mSpots[cordinate.x][cordinate.y][cordinate.z];
 	}
@@ -448,7 +448,7 @@ public class Board implements Cloneable {
 	 * @author 0000140105
 	 *
 	 */
-	public class Cordinate implements Cloneable {
+	public static class Cordinate implements Cloneable {
 		public int x, y, z;
 		public Cordinate(int x, int y, int z) {
 			this.x = x;
@@ -474,19 +474,69 @@ public class Board implements Cloneable {
 		public void setCordinate(Cordinate cordinate) {
 			setCordinate(cordinate.x, cordinate.y, cordinate.z);
 		}
-		private Board getOuterType() {
-			return Board.this;
+
+		/**
+		 * 指定された方角へdistance移動させた座標を返却する
+		 * @param cordinate
+		 * @param distance
+		 * @return
+		 */
+		public Cordinate getMovedCordinate(int distance, Direction direction) {
+			assert distance == 2 || distance == 1;
+			Cordinate result = this.clone();
+
+			int dx=0, dy=0, dz=0;
+
+			switch(direction){
+			case RIGHT_FRONT:
+				dx = distance;
+				dy = -distance;
+				dz = 0;
+				break;
+			case RIGHT:
+				dx = 0;
+				dy = -distance;
+				dz = distance;
+				break;
+			case RIGHT_REAR:
+				dx = -distance;
+				dy = 0;
+				dz = distance;
+				break;
+			case LEFT_REAR:
+				dx = -distance;
+				dy = distance;
+				dz = 0;
+				break;
+			case LEFT:
+				dx = 0;
+				dy = distance;
+				dz = -distance;
+				break;
+			case LEFT_FRONT:
+				dx = distance;
+				dy = 0;
+				dz = -distance;
+				break;
+			}
+
+			result.x += dx;
+			result.y += dy;
+			result.z += dz;
+
+			return result;
 		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + getOuterType().hashCode();
 			result = prime * result + x;
 			result = prime * result + y;
 			result = prime * result + z;
 			return result;
 		}
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -496,8 +546,6 @@ public class Board implements Cloneable {
 			if (getClass() != obj.getClass())
 				return false;
 			Cordinate other = (Cordinate) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
 			if (x != other.x)
 				return false;
 			if (y != other.y)
@@ -506,6 +554,7 @@ public class Board implements Cloneable {
 				return false;
 			return true;
 		}
+
 	}
 
 }
