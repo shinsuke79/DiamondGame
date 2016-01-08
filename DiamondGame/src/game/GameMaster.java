@@ -43,7 +43,7 @@ public class GameMaster implements Runnable {
 	}
 
 	private void stateControl() {
-		mLog.fine("stateControl state:%s", mState.name());
+		// mLog.fine("stateControl state:%s", mState.name());
 		switch(mState){
 		case CALL_USER:
 			procInCallUser();
@@ -80,7 +80,7 @@ public class GameMaster implements Runnable {
 	}
 
 	private void procInWaitCallback() {
-		mLog.fine("start procInWaitCallback ");
+		// mLog.fine("start procInWaitCallback ");
 		// Userからのコールバックを待つ
 		boolean isMoveReady = false;
 		boolean isCancelled = false;
@@ -93,8 +93,12 @@ public class GameMaster implements Runnable {
 			isMoveReady = false;
 			mWaitCount++;
 		}
-		mLog.fine("MoveReady:%b Cancelled:%b(waitCount:%d/%d) ", isMoveReady, isCancelled,
-				mWaitCount, ((mGame.mRule.timeLimitSec*1000)/WAIT_MSEC));
+
+		// 1秒ごと出力
+		if((mWaitCount%(1000/WAIT_MSEC))==0){
+			mLog.fine("MoveReady:%b Cancelled:%b(waitCount:%d/%d) ", isMoveReady, isCancelled,
+					mWaitCount, ((mGame.mRule.timeLimitSec*1000)/WAIT_MSEC));
+		}
 
 		// Userからのコールバックが返ってくるか、タイムアウトしたら次へ進む
 		if(isMoveReady){
@@ -248,6 +252,7 @@ public class GameMaster implements Runnable {
 	}
 
 	public final synchronized void say(GameMasterMessage message, User caller, Object... objects) {
+		mLog.fine("say %h message:%s calller:%h", this, message.name(), caller);
 		if(message.equals(GameMasterMessage.FINISHED)){
 			if(caller == mGame.getCurrentUser() && mState.equals(State.WAIT_CALLBACK)){
 				mIsReceiveFinished = true;

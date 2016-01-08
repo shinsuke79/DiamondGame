@@ -68,6 +68,7 @@ public abstract class User implements Runnable {
 	private final void procInThinking() {
 		mLog.info("call Think");
 		think(mUserBoard, mMove);
+		mLog.info("Think Finished.");
 		setState(State.TERMINATE);
 		mGameMaster.say(GameMasterMessage.FINISHED, this);
 		mUserBoard = null;
