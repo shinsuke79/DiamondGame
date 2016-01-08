@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import common.DGLog;
 import common.Direction;
 import common.TeamColor;
 import game.Board.Cordinate;
@@ -15,7 +16,12 @@ public class UserBoard {
 	private TeamColor      mainTeam;
 	private EnumMap<TeamColor, Set<UserPiece>> pieces;
 
+	DGLog   mLog;
+
 	UserBoard(TeamColor mainTeam, Board board) {
+		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
+		mLog.info("Create " + getClass().getSimpleName());
+
 		// ShallowCopy(DeepCopyはあえてしない)
 		this.cloneBoard   = (Board)board.clone();
 		changeMainTeam(mainTeam);
@@ -23,6 +29,9 @@ public class UserBoard {
 
 	/* -------- Userに公開するAPI --------  */
 	public void changeMainTeam(TeamColor team){
+		mLog.fine("changeMainTeam(%s) start", team);
+		cloneBoard.logConsoleBoardImage();
+
 		this.mainTeam     = team;
 		this.boards       = new UserSpot[10][10];
 		for(TeamColor tc: TeamColor.values()){
@@ -37,23 +46,35 @@ public class UserBoard {
 
 		// ルートから、すべてのSpotの右前、左上と展開していく
 		exactSpot(team, rootSpot, new UserCordinate(0, 0));
+
+		mLog.fine("changeMainTeam(%s) end", team);
+		logConsoleUserBoardImage();
+	}
+
+	public void logConsoleUserBoardImage() {
+		// TODO
 	}
 
 	/* -------- Userには公開しないAPI --------  */
 	private void exactSpot(TeamColor team, Spot spot, UserCordinate uCordinate){
+		mLog.fine("exactSpot start team:%s spot:%s cordinate:%s", team, spot, uCordinate);
+
 		// 引数に該当するUserSpotをnewする
 		UserSpot targetSpot = boards[uCordinate.x][uCordinate.y] = new UserSpot(spot, uCordinate);
+		mLog.fine("exactSpot create userSpot:%s ", targetSpot);
 
 		// SpotにPieceが存在すればUserSpotにUserPieceとして配置する
 		if(spot.mPiece != null){
 			UserPiece uPiece = new UserPiece(spot.mPiece);
 			targetSpot.setPiece(uPiece);
 			pieces.get(spot.mPiece.getmTeamColor()).add(uPiece);
+			mLog.fine("put userPiece :%s -> Spot:%s ", uPiece, targetSpot);
 		}
 
 		// 右前側のSpot チーム視点の欲しい方角(右前)を基準方角し、次のSpotを取得する
 		Direction convedDirectionRightF = Direction.RIGHT_FRONT.getRelativeDirection(team);
 		Spot rightFront = cloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionRightF));
+		mLog.fine("exact rightFront(%s) -> Spot:%s ", convedDirectionRightF, rightFront);
 		if(rightFront != null){
 			exactSpot(team, rightFront, uCordinate.getMovedCordinate(1, Direction.RIGHT_FRONT));
 		}
@@ -61,6 +82,7 @@ public class UserBoard {
 		// 左前側のSpot チーム視点の欲しい方角(左前)を基準方角に変換し、次のSpotを取得する
 		Direction convedDirectionLeftF = Direction.LEFT_FRONT. getRelativeDirection(team);
 		Spot leftFront = cloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionLeftF));
+		mLog.fine("exact leftFront(%s) -> Spot:%s ", convedDirectionLeftF, leftFront);
 		if(leftFront != null){
 			exactSpot(team, leftFront, uCordinate.getMovedCordinate(1, Direction.LEFT_FRONT));
 		}
@@ -84,6 +106,11 @@ public class UserBoard {
 
 		Piece getBasePiece(){
 			return basePiece;
+		}
+
+		@Override
+		public String toString() {
+			return basePiece.toString();
 		}
 	}
 
@@ -175,6 +202,10 @@ public class UserBoard {
 			}
 
 			return new UserCordinate(this.getX()+dx, this.getY()+dy);
+		}
+		@Override
+		public String toString() {
+			return "UserCordinate [x=" + x + ", y=" + y + "]";
 		}
 	}
 }

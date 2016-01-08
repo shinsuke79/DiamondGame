@@ -1,12 +1,15 @@
 package game;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 
+import common.DGLog;
 import common.Direction;
 import common.TeamColor;
 
@@ -18,10 +21,17 @@ public class Board implements Cloneable {
 	Piece[] mRedPieces;
 	Piece[] mYellowPieces;
 	Piece[] mGreenPieces;
+	DGLog   mLog;
 
 	public Board() {
+		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
+		mLog.info("Create " + getClass().getSimpleName());
 	}
 
+	/**
+	 * BoardインスタンスをCloneします。
+	 * ShallowコピーなのでPieceやSpotの中の参照はそのままです
+	 */
 	protected Board clone(){
 		try {
 			return (Board)super.clone();
@@ -35,6 +45,8 @@ public class Board implements Cloneable {
 	 * 自身の持つマス(Spot)、駒(Piece)を新たに配置します
 	 */
 	private void createBaseBoard() {
+		mLog.config("createBaseBoard start");
+
 		/* Spot配列の初期化 */
 		mSpots = new Spot[13][13][13];
 
@@ -110,17 +122,29 @@ public class Board implements Cloneable {
 			}
 		}
 
+		mLog.config("createBaseBoard end");
+		logConsoleBoardImage();
+	}
+
+	public void logConsoleBoardImage() {
+		for(String s: getBoadString()){
+			mLog.info(s);
+		}
 	}
 
 	/**
 	 * 自身の持つマス(Spot)、駒(Piece)を新たに配置します
 	 */
 	public void placePiece() {
+		mLog.fine("placePiece start");
 		createBaseBoard();
+		mLog.fine("placePiece end");
 	}
 
 	public void move(Move move) {
-		// 移動が打倒であることの確認
+		mLog.info("move start %s", move);
+
+		// 移動が妥当であることの確認
 		if(!isMoveValid(move)){
 			// ありえない
 			assert false;
@@ -133,11 +157,15 @@ public class Board implements Cloneable {
 		Spot currentSpot = getSpotFromPiece(piece);
 		Spot nextSpot    = spots.get(0);
 		while(!spots.isEmpty()){
+			mLog.fine("moving... cur:%s next:%s", currentSpot, nextSpot);
 			movePiece(currentSpot, nextSpot);
 			spots.remove(0);
 			currentSpot = nextSpot;
 			nextSpot    = !spots.isEmpty()? spots.get(0) : null;
 		}
+
+		mLog.info("move end %s", move);
+		logConsoleBoardImage();
 	}
 
 	/**
@@ -151,6 +179,7 @@ public class Board implements Cloneable {
 		Piece piece = currentSpot.mPiece;
 		currentSpot.mPiece = null;
 		nextSpot.mPiece    = piece;
+		mLog.fine("movePiece %s -> %s", currentSpot, nextSpot);
 	}
 
 	/**
@@ -164,6 +193,7 @@ public class Board implements Cloneable {
 		long point = teamSpots.stream()
 		.filter((s)->(s.mPiece != null) && (s.mPiece.getmTeamColor() == teamColor) )
 		.count();
+		mLog.fine("getTeamPoint %s -> %d", teamColor.getName(), point);
 		return (int)point;
 	}
 
@@ -173,7 +203,9 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	public boolean isFinishedTeam(TeamColor teamColor){
-		return getTeamPoint(teamColor) == 10;
+		boolean result = getTeamPoint(teamColor) == 10;
+		mLog.fine("isFinishedTeam? %s -> %b", teamColor.getName(), result);
+		return result;
 	}
 
 	/**
@@ -182,6 +214,7 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	public UserBoard getUserBoard(TeamColor myTeam) {
+		mLog.fine("getUserBoard called %s", myTeam);
 		return new UserBoard(myTeam, this);
 	}
 
@@ -191,12 +224,15 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	public boolean isMoveValid(Move move) {
+		mLog.fine("isMoveValid start %s", move);
+
 		// User型のPiece/Spotを共通型へ変換
 		Piece piece = move.mPiece.getBasePiece();
 		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m.getBaseCordinate())).collect(Collectors.toList());
 
 		// 動かす駒がTeamColorに一致していることの確認
 		if(piece.getmTeamColor() != move.getmTeam()){
+			mLog.warning("isMoveValid error(teamColor) team:%s but piece:%s", move.getmTeam(), piece.getmTeamColor());
 			return false;
 		}
 
@@ -206,16 +242,19 @@ public class Board implements Cloneable {
 		while(!spots.isEmpty()){
 			if(isAvailableMove(currentSpot, nextSpot)){
 				// 次の移動を確認する
+				mLog.warning("isMoveValid current:%s -> next:%s OK", currentSpot, nextSpot);
 				spots.remove(0);
 				currentSpot = nextSpot;
 				nextSpot    = !spots.isEmpty()? spots.get(0) : null;
 			}else{
 				// 移動できないSpotが登録されていたため失敗
+				mLog.warning("isMoveValid error(cant move) current:%s -> next:%s", currentSpot, nextSpot);
 				return false;
 			}
 		}
 
 		// 移動可能
+		mLog.fine("isMoveValid end(valid)");
 		return true;
 	}
 
@@ -226,8 +265,11 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	private boolean isAvailableMove(Spot currentSpot, Spot nextSpot) {
+		mLog.fine("isAvailableMove start current:%s -> next:%s", currentSpot, nextSpot);
+
 		// どちらかのSpotが存在しなければfalse
 		if(currentSpot == null || nextSpot == null){
+			mLog.warning("isMoveValid error(cant move) current:%s -> next:%s", currentSpot, nextSpot);
 			return false;
 		}
 
@@ -250,16 +292,21 @@ public class Board implements Cloneable {
 
 		// 移動先が存在しなければfalse
 		if(!isContainAroundSpots){
+			mLog.warning("isAvailableMove error(not found) ");
 			return false;
 		}
 		// 距離が1なら移動先にPieceが存在しなければ移動可能
 		else if(distance == 1){
-			return nextSpot.mPiece == null;
+			boolean result = nextSpot.mPiece == null;
+			mLog.fine("isAvailableMove distance=1 result:%b ", result);
+			return result;
 		}
 		// 距離が2なら同方角の目の前にPieceが存在し、nextSpotにPieceが存在しなければ移動可能
 		else if(distance == 2){
 			Spot jumpSpot = getNextSpotUsingDirection(currentSpot, direction, 1);
-			return jumpSpot.mPiece != null && nextSpot.mPiece == null;
+			boolean result = jumpSpot.mPiece != null && nextSpot.mPiece == null;
+			mLog.fine("isAvailableMove distance=2 result:%b ", result);
+			return result;
 		}
 		// それ以外はありえないはず
 		else{
@@ -276,12 +323,17 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	private EnumMap<Direction, Spot> getAroundSpot(Spot spot, int distance) {
+		mLog.fine("getAroundSpot start spot:%s distance:%d ", spot, distance);
 		assert spot != null;
 		assert distance == 1 || distance == 2;
 
 		EnumMap<Direction, Spot> result = new EnumMap<>(Direction.class);
 		for(Direction d: Direction.values()){
 			result.put(d, getNextSpotUsingDirection(spot, d, distance));
+		}
+
+		for(Entry<Direction, Spot> e: result.entrySet()){
+			mLog.fine("getAroundSpot %s:\t%s ", e.getKey(), e.getValue());
 		}
 		return result;
 	}
@@ -292,6 +344,7 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	private Set<Spot> getTeamGoalSpot(TeamColor team){
+		mLog.fine("getTeamGoalSpot start team:%s ", team);
 		HashSet<Spot> result = new HashSet<>();
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
@@ -301,6 +354,9 @@ public class Board implements Cloneable {
 					}
 				}
 			}
+		}
+		for(Spot s: result){
+			mLog.fine("getTeamGoalSpot %s ", s);
 		}
 		return result;
 	}
@@ -314,19 +370,25 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	private Spot getNextSpotUsingDirection(Spot spot, Direction direction, int distance){
+		mLog.fine("getNextSpotUsingDirection start spot:%s direction:%s distance:%d", spot, direction, distance);
+
 		// Spotが存在しなければnullを返す
 		if(spot == null){
+			mLog.fine("getNextSpotUsingDirection spot is null");
 			return null;
 		}
 
 		// 指定された方向の座標を取得する
 		Cordinate newCordinate = spot.mCordinate.getMovedCordinate(distance, direction);
 		if(newCordinate == null || !checkCordinate(newCordinate)){
+			mLog.fine("getNextSpotUsingDirection cordinate is over");
 			return null;
 		}
 
 		// 新たな座標をSpotに変換してReturn
-		return getSpotFromCordinate(newCordinate);
+		Spot result = getSpotFromCordinate(newCordinate);
+		mLog.fine("getNextSpotUsingDirection result :%s", result);
+		return result;
 	}
 
 	/**
@@ -336,9 +398,11 @@ public class Board implements Cloneable {
 	 */
 	private boolean checkCordinate(Cordinate cordinate){
 		IntPredicate checker = (c)->(0<c && c<13);
-		return checker.test(cordinate.x)
+		boolean result = checker.test(cordinate.x)
 				&& checker.test(cordinate.y)
 				&& checker.test(cordinate.z);
+		mLog.fine("checkCordinate cordinate:%s result:%b", cordinate, result);
+		return result;
 	}
 
 	/**
@@ -368,6 +432,58 @@ public class Board implements Cloneable {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * [コンソール出力用] 指定されたBoardの状況をコンソール用に生成します
+	 * String.format使えばよかった…
+	 * @return
+	 */
+	public List<String> getBoadString(){
+		List<String> result = new ArrayList<>();
+		result.add(" ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑭⑮⑯⑰⑱⑲");
+		result.add("A                    "+s2cs(12,3,3)+"                  ");
+		result.add("B                  "+s2cs(11,4,3)+"  "+s2cs(11,3,4)+"                ");
+		result.add("C                "+s2cs(10,5,3)+"  "+s2cs(10,4,4)+"  "+s2cs(10,3,5)+"              ");
+		result.add("D  "+s2cs(9,9,0)+"  "+s2cs(9,8,1)+"  "+s2cs(9,7,2)+"  "+s2cs(9,6,3)+"  "+
+				s2cs(9,5,4)+"  "+s2cs(9,4,5)+"  "+s2cs(9,3,6)+"  "+s2cs(9,2,7)+"  "+
+				s2cs(9,1,8)+"  "+s2cs(9,0,9)+"");
+		result.add("E    "+s2cs(8,9,1)+"  "+s2cs(8,8,2)+"  "+s2cs(8,7,3)+"  "+s2cs(8,6,4)+"  "+s2cs(8,5,5)+"  "+
+				s2cs(8,4,6)+"  "+s2cs(8,3,7)+"  "+s2cs(8,2,8)+"  "+s2cs(8,1,9)+"  ");
+		result.add("F      "+s2cs(7,9,2)+"  "+s2cs(7,8,3)+"  "+s2cs(7,7,4)+"  "+s2cs(7,6,5)+"  "+s2cs(7,5,6)+"  "+
+				s2cs(7,4,7)+"  "+s2cs(7,3,8)+"  "+s2cs(7,2,9)+"    ");
+		result.add("G        "+s2cs(6,9,3)+"  "+s2cs(6,8,4)+"  "+s2cs(6,7,5)+"  "+s2cs(6,6,6)+"  "+s2cs(6,5,7)+"  "+
+				s2cs(6,4,8)+"  "+s2cs(6,3,9)+"      ");
+		result.add("H      "+s2cs(5,10,3)+"  "+s2cs(5,9,4)+"  "+s2cs(5,8,5)+"  "+s2cs(5,7,6)+"  "+s2cs(5,6,7)+"  "+
+				s2cs(5,5,8)+"  "+s2cs(5,4,9)+"  "+s2cs(5,3,10)+"    ");
+		result.add("I    "+s2cs(4,11,3)+"  "+s2cs(4,10,4)+"  "+s2cs(4,9,5)+"  "+s2cs(4,8,6)+"  "+s2cs(4,7,7)+"  "+
+				s2cs(4,6,8)+"  "+s2cs(4,5,9)+"  "+s2cs(4,4,10)+"  "+s2cs(4,3,11)+"  ");
+		result.add("J  "+s2cs(3,12,3)+"  "+s2cs(3,11,4)+"  "+s2cs(3,10,5)+"  "+s2cs(3,9,6)+"  "+s2cs(3,8,7)+"  "+
+				s2cs(3,7,8)+"  "+s2cs(3,6,9)+"  "+s2cs(3,5,10)+"  "+s2cs(3,4,11)+"  "+s2cs(3,3,12)+"");
+		result.add("K                "+s2cs(2,9,7)+"  "+s2cs(2,8,8)+"  "+s2cs(2,7,9)+"              ");
+		result.add("L                  "+s2cs(1,9,8)+"  "+s2cs(1,8,9)+"                ");
+		result.add("M                    "+s2cs(0,9,9)+"                  ");
+		return result;
+	}
+	/**
+	 * [コンソール出力用] 指定された座標のSpotを一文字の文字列に変換します spot to console string
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	private String s2cs(int x, int y, int z){
+		Spot spot = getSpotFromCordinate(new Cordinate(x, y, z));
+		if(spot.mPiece != null){
+			switch(spot.mPiece.getmTeamColor()){
+			case GREEN:  return "緑";
+			case RED:    return "赤";
+			case YELLOW: return "黄";
+			}
+		}else{
+			return "○";
+		}
+		return "  ";
 	}
 
 	/**
@@ -438,7 +554,10 @@ public class Board implements Cloneable {
 				return false;
 			return true;
 		}
-
+		@Override
+		public String toString() {
+			return "Spot [mPiece=" + mPiece + ", mTeam=" + mTeam + ", mCordinate=" + mCordinate + "]";
+		}
 	}
 
 	/**
@@ -555,6 +674,10 @@ public class Board implements Cloneable {
 			return true;
 		}
 
+		@Override
+		public String toString() {
+			return "Cordinate [x=" + x + ", y=" + y + ", z=" + z + "]";
+		}
 	}
 
 }

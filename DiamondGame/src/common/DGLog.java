@@ -68,7 +68,7 @@ public class DGLog {
 		log(Level.FINE, format, args);
 	}
 
-	public void log(Level level, String format, Object... args){
+	public synchronized void log(Level level, String format, Object... args){
 		if(DGConfig.LogLevel.intValue() <= level.intValue()){
 			String formatStr = String.format(format, args);
 			Date dat = new Date();

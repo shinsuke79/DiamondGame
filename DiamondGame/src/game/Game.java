@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import common.DGLog;
 import common.TeamColor;
 import user.User;
 import view.UserInterface;
@@ -23,10 +24,14 @@ public class Game {
 	TeamColor  mFirstTeam;
 	List<TeamColor> mGoalTeams;
 	int        mTernNo;
+	DGLog   mLog;
 
 	public Game(GameConfig gameConfig) {
 		assert gameConfig != null;
 		mRule = gameConfig;
+
+		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
+		mLog.info("Create " + getClass().getSimpleName());
 	}
 
 	/**
@@ -37,6 +42,7 @@ public class Game {
 	public void assignUsers(Map<TeamColor, User> users) {
 		assert users != null;
 		assert users.size() == 3;
+		mLog.info("assignUsers %s", users);
 		mUsers = users;
 	}
 
@@ -45,6 +51,7 @@ public class Game {
 	 * @param gameMaster
 	 */
 	public void assignGameMaster(GameMaster gameMaster) {
+		mLog.info("assignGameMaster %h", gameMaster);
 		mGameMaster = gameMaster;
 		gameMaster.setGame(this);
 	}
@@ -55,6 +62,7 @@ public class Game {
 	 */
 	public void setUserInterface(UserInterface ui) {
 		assert ui != null;
+		mLog.info("assignGameMaster %s", ui.getClass().getName());
 		mUI = ui;
 	}
 
@@ -62,20 +70,27 @@ public class Game {
 	 * ゲームを開始するための準備を行います
 	 */
 	public void prepareGame() {
+		mLog.info("prepareGame start");
 		mGoalTeams = new ArrayList<>();
 
 		/* あとはゲームマスターが準備する */
 		mGameMaster.prepareGame();
+
+		mLog.info("prepareGame end");
 	}
 
 	/* ボードを作成する */
 	public void createBoard(){
+		mLog.info("prepareGame start");
 		mBoard = new Board();
+		mLog.info("prepareGame end");
 	}
 
 	/* ゲームをする気持ちになる */
 	public void startGame() {
+		mLog.info("startGame start");
 		mGameMaster.startGame();
+		mLog.info("startGame end");
 	}
 
 	/**
@@ -83,14 +98,17 @@ public class Game {
 	 * @param firstTeam
 	 */
 	public void setFirstTeam(TeamColor firstTeam) {
+		mLog.info("setFirstTeam firstTeam:%s", firstTeam);
 		mCurrentTeam = mFirstTeam = firstTeam;
 	}
 
 	public UserInterface getUI() {
+		mLog.fine("getUI ui:%s", mUI.getClass().getName());
 		return mUI;
 	}
 
 	public Map<TeamColor, User> getUsers() {
+		mLog.fine("getUsers %s", mUsers);
 		return mUsers;
 	}
 
@@ -107,7 +125,9 @@ public class Game {
 	}
 
 	public User getCurrentUser() {
-		return mUsers.get(mCurrentTeam);
+		User user = mUsers.get(mCurrentTeam);
+		mLog.fine("getCurrentUser %s", user);
+		return user;
 	}
 
 	public UserBoard getUserBoard(User user) {
@@ -127,6 +147,7 @@ public class Game {
 				break;
 			}
 		}
+		mLog.info("getNextTeam %s", nextTeam);
 		return nextTeam;
 	}
 
@@ -135,6 +156,7 @@ public class Game {
 	 * @param nextTeam
 	 */
 	public void setNextTeam(TeamColor nextTeam) {
+		mLog.info("setNextTeam %s", nextTeam);
 		mCurrentTeam = nextTeam;
 	}
 
@@ -151,14 +173,18 @@ public class Game {
 	 * @param mTernNo
 	 */
 	public void setmTernNo(int mTernNo) {
+		mLog.info("setmTernNo %d", mTernNo);
 		this.mTernNo = mTernNo;
 	}
 
 	public List<TeamColor> getGoalTeams() {
+		mLog.info("getGoalTeams %s", mGoalTeams);
 		return mGoalTeams;
 	}
 
 	public int getTeamPoint(TeamColor teamColor){
-		return mBoard.getTeamPoint(teamColor);
+		int teamPoint = mBoard.getTeamPoint(teamColor);
+		mLog.fine("getTeamPoint %s -> %d", teamColor, teamPoint);
+		return teamPoint;
 	}
 }

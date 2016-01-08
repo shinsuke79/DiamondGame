@@ -36,4 +36,8 @@ public class Move {
 		mMoveSpots = new ArrayList<>();
 	}
 
+	@Override
+	public String toString() {
+		return "Move [mTeam=" + mTeam.getName() + ", mPiece=" + mPiece + ", mMoveSpots=" + mMoveSpots + "]";
+	}
 }

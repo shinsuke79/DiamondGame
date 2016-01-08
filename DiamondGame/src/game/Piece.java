@@ -25,4 +25,9 @@ public class Piece {
 		return mNum;
 	}
 
+	@Override
+	public String toString() {
+		return "Piece [mTeamColor=" + mTeamColor + ", mNum=" + mNum + "]";
+	}
+
 }

@@ -8,6 +8,8 @@ public enum Direction {
 	LEFT(4),        // ←
 	LEFT_FRONT(5);  // ↖
 
+	static DGLog Log = new DGLog(Direction.class.getSimpleName());
+
 	int mNum;
 	private Direction(int num) {
 		mNum = num;
@@ -37,7 +39,9 @@ public enum Direction {
 			break;
 		}
 		// 新たなnumに該当するDirectionを返却
-		return ConvDirectionFromNum(relativeNum);
+		Direction result = ConvDirectionFromNum(relativeNum);
+		Log.fine("getRelativeDirection this:%s color:%s -> %s ", this.name(), color.getName(), result.name());
+		return result;
 	}
 
 	/**
