@@ -60,6 +60,22 @@ public class UserBoard {
 		}
 	}
 
+	public UserSpot getUserSpotFromPiece(UserPiece uPiece){
+		for(int x=0; x<10; x++){
+			for(int y=0; y<10; y++){
+				if(boards[x][y]!=null && boards[x][y].piece == uPiece){
+					return boards[x][y];
+				}
+			}
+		}
+		return null;
+	}
+
+	public UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
+		// TODO 自動生成されたメソッド・スタブ
+		return null;
+	}
+
 	/**
 	 * [コンソール出力用] 指定されたBoardの状況をコンソール用に生成します
 	 * String.format使えばよかった…
@@ -105,6 +121,33 @@ public class UserBoard {
 			return "○";
 		}
 		return "  ";
+	}
+
+	public Set<UserPiece> getPiecesFromTeam(TeamColor team){
+		return pieces.get(team);
+	}
+
+	public boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
+		return true; // TODO
+	}
+
+	public UserSpot getNextSpotUsingDirection(UserSpot spot, Direction direction, int distance){
+		return null; // TODO
+	}
+
+	public EnumMap<Direction, UserSpot> getAroundSpot(UserSpot spot, int distance){
+		return null; // TODO
+	}
+
+	public Set<UserSpot> getMovableSpots(UserSpot spot){
+		Set<UserSpot> result = new HashSet<>();
+		getAroundSpot(spot, 1).values().stream()
+							.filter((us)->isAvailableMove(spot, us))
+							.forEach((us)->result.add(us));
+		getAroundSpot(spot, 2).values().stream()
+							.filter((us)->isAvailableMove(spot, us))
+							.forEach((us)->result.add(us));
+		return result;
 	}
 
 	/* -------- Userには公開しないAPI --------  */

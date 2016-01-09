@@ -3,10 +3,14 @@ package view.consoleUI;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import common.DGConfig;
 import common.DGLog;
@@ -15,9 +19,12 @@ import game.Game;
 import game.GameConfig;
 import game.GameManager;
 import game.GameMaster;
+import game.UserBoard;
+import game.UserBoard.UserSpot;
 import user.User;
 import user.UserInfo;
 import user.UserManager;
+import user.humanUser.HumanUser;
 import view.UserInterface;
 
 public class ConsoleUserInterface implements UserInterface, Runnable {
@@ -238,7 +245,6 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 			BufferedReader br = new BufferedReader(isr);
 			return br.readLine();
 		} catch (IOException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
@@ -267,11 +273,143 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 	}
 
 	@Override
-	public boolean askHand(UIBoardSpot userHand) {
-		return false;
+	public UIHand askHand(HumanUser humanUser, UserBoard userBoard) {
+		// コンソールに現在の状況を表示
+		userBoard.logConsoleUserBoardImage();
+
+		// 移動元を選択してもらう
+		System.out.println("移動元のマスを選択してください");
+
+		// 移動できる座標の候補一覧を取得
+		List<UserSpot> fromUserSpots =  userBoard.getPiecesFromTeam(humanUser.getMyTeam()).stream()
+										.map((up)->userBoard.getUserSpotFromPiece(up))
+										.collect(Collectors.toList());
+		List<UIBoardSpot> fromUISpots = fromUserSpots.stream()
+										.map((u)->UIBoardSpot.parseUserCordinate(u.getCordinate()))
+										.collect(Collectors.toList());
+
+		UIBoardSpot fromUiSpot = null;
+		while(fromUiSpot == null){
+			// 候補を表示
+			System.out.print("移動元候補：");
+			fromUISpots.forEach((us)->System.out.print(us.getValueStr()+","));
+			System.out.println();
+
+			// ユーザ入力
+			UIBoardSpot inputUiSpot = selectUISpot();
+
+			// fromUISpotsに含まれているか確認
+			if(fromUISpots.contains(inputUiSpot)){
+				fromUiSpot = inputUiSpot;
+			}
+			// ダメならやり直し
+			else{
+				System.out.println("入力に誤りがあります");
+			}
+		}
+
+		// 選択したSpotからPieecを移動させる軌跡を構築する
+		System.out.println("駒を移動させる軌跡を選択していきます");
+		List<UIBoardSpot> to = new ArrayList<>();
+		UIBoardSpot currentToSpot = fromUiSpot;
+		while(true){
+			// 最初に選んだSpotを表示
+			System.out.printf("移動元: %s \n", fromUiSpot.getValueStr());
+
+			// 現在のSpotを表示
+			System.out.printf("現在: %s \n", currentToSpot.getValueStr());
+
+			// 現在のSpotから移動可能なSpot(全方位1と2)を取得する
+			UserSpot currentToUserSpot = userBoard.getUserSpotFromCordinate(currentToSpot.toUserCordinate());
+			Set<UserSpot> toMovableSpots = userBoard.getMovableSpots(currentToUserSpot);
+			List<UIBoardSpot> toMovableUISpots = toMovableSpots.stream()
+											.map((u)->UIBoardSpot.parseUserCordinate(u.getCordinate()))
+											.collect(Collectors.toList());
+
+			// 表示
+			System.out.print("移動先候補：");
+			toMovableUISpots.forEach((us)->System.out.print(us.getValueStr()+","));
+			System.out.println();
+
+			// ユーザー入力
+			UIBoardSpot inputUiSpot = selectUISpot();
+
+			// 候補に含まれているか確認
+			if(!toMovableUISpots.contains(inputUiSpot)){
+				System.out.println("入力に誤りがあります");
+				continue;
+			}
+
+			// Listに追加
+			to.add(inputUiSpot);
+
+			// currentを今選択したSpotに変更
+			currentToSpot = inputUiSpot;
+
+			// 続けますか？(yse/no/reset)
+			System.out.println("Pieceの移動を継続しますか？(yes:続ける no:終わり reset:最初から)");
+			String userChoice = null;
+			while(true){
+				userChoice = getUserInput();
+				if(userChoice == null){
+					System.out.println("入力に誤りがあります");
+					continue;
+				}
+				if(!Arrays.asList("yes","no","reset").contains(userChoice)){
+					System.out.println("入力に誤りがあります");
+					continue;
+				}
+				break;
+			}
+
+			// yesなら続ける、resetならListとcurrentをリセットして続ける、noなら終了
+			if(userChoice.equals("yes")){
+				continue;
+			}else if(userChoice.equals("reset")){
+				currentToSpot = fromUiSpot;
+				to.clear();
+				continue;
+			}else{
+				break;
+			}
+		}
+
+		// 返却する情報を生成
+		UIHand result = new UIHand();
+		result.from = fromUiSpot;
+		result.to   = to;
+
+		return result;
 	}
 
+	private UIBoardSpot selectUISpot() {
+		String inputStrSpot;
+		UIBoardSpot inputUiSpot;
 
+		do{
+			// 初期化
+			inputStrSpot = null;
+			inputUiSpot  = null;
+
+			// 文字列を取得
+			inputStrSpot = getUserInput();
+			if(inputStrSpot == null){
+				System.out.println("入力に誤りがあります");
+				continue;
+			}
+
+			// UIBoardSpotに変換できるかチャレンジ
+			inputUiSpot = UIBoardSpot.parseString(inputStrSpot);
+			if(inputUiSpot == null){
+				System.out.println("入力に誤りがあります");
+				continue;
+			}
+
+		}while(inputStrSpot==null || inputUiSpot==null);
+
+		// 変換できたらリターン
+		return inputUiSpot;
+	}
 }
 
 // 　①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑭⑮⑯⑰⑱

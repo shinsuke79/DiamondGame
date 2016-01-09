@@ -1,7 +1,13 @@
 package view;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import game.GameManager;
+import game.UserBoard;
+import game.UserBoard.UserCordinate;
 import user.UserManager;
+import user.humanUser.HumanUser;
 
 public interface UserInterface {
 
@@ -18,7 +24,21 @@ public interface UserInterface {
 	 */
 	void setManager(GameManager gameMgr, UserManager userMgr);
 
-	boolean askHand(UIBoardSpot userHand);
+	UIHand askHand(HumanUser humanUser, UserBoard userBoard);
+
+	/**
+	 * ユーザーの手を表す
+	 * @author yone
+	 *
+	 */
+	public class UIHand {
+		public UIBoardSpot from;
+		public List<UIBoardSpot> to;
+		public UIHand() {
+			from = null;
+			to   = new ArrayList<>();
+		}
+	}
 
 	/**
 	 * ユーザーに見せるボード盤のマスの位置を表す
@@ -64,6 +84,47 @@ public interface UserInterface {
 			return isValid;
 		}
 
+		public UserCordinate toUserCordinate(){
+			return null; // TODO
+		}
 
+		public static UIBoardSpot parseUserCordinate(UserCordinate uCordinate){
+			return null; // TODO
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + column;
+			result = prime * result + line;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			UIBoardSpot other = (UIBoardSpot) obj;
+			if (column != other.column)
+				return false;
+			if (line != other.line)
+				return false;
+			return true;
+		}
+
+		public String getValueStr() {
+			// TODO 自動生成されたメソッド・スタブ
+			return null;
+		}
+
+		public static UIBoardSpot parseString(String inputStrSpot) {
+			// TODO 自動生成されたメソッド・スタブ
+			return null;
+		}
 	}
 }
