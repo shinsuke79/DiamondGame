@@ -137,6 +137,7 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		switch(input){
 		case 1:
 			System.out.println("ゲーム開始");
+			// SmoothDebugOnConsoleがTrueの場合、ゲーム設定を省略する
 			if(!DGConfig.SmoothDebugOnConsole){
 				mState = State.CONFIG;
 			}else{

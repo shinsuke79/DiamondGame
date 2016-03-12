@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import common.DGLog;
-import common.TeamColor;
-import game.Move;
-import game.UserBoard;
+import user.humanUser.HumanUser;
 
 public class UserManager {
 	ArrayList<UserInfo> mUsers;
@@ -29,6 +27,8 @@ public class UserManager {
 	}
 
 	public User createUser(UserInfo userInfo) {
+		return new HumanUser(userInfo);
+/*
 		// TODO
 		return new User(userInfo) {
 			@Override
@@ -48,6 +48,6 @@ public class UserManager {
 			public void handShake(User handShakeUser, TeamColor teamColor) {
 			}
 		};
+ */
 	}
-
 }
