@@ -154,6 +154,10 @@ public class UserBoard {
 	private void exactSpot(TeamColor team, Spot spot, UserCordinate uCordinate){
 		mLog.fine("exactSpot start team:%s spot:%s cordinate:%s", team, spot, uCordinate);
 
+		if(boards[uCordinate.x][uCordinate.y] != null){
+			return;
+		}
+
 		// 引数に該当するUserSpotをnewする
 		UserSpot targetSpot = boards[uCordinate.x][uCordinate.y] = new UserSpot(spot, uCordinate);
 		mLog.fine("exactSpot create userSpot:%s ", targetSpot);
