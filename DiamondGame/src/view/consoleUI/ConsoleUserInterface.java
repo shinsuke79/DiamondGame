@@ -334,9 +334,11 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 
 			// ユーザー入力
 			UIBoardSpot inputUiSpot = selectUISpot();
+			mLog.fine("User Sellect UiSpot:%s", inputUiSpot.getValueStr());
 
 			// 候補に含まれているか確認
 			if(!toMovableUISpots.contains(inputUiSpot)){
+				mLog.fine("uiSpot is not included in toMovableUISpots");
 				System.out.println("入力に誤りがあります");
 				continue;
 			}
@@ -413,7 +415,7 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 	}
 }
 
-// 　①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑭⑮⑯⑰⑱
+// 　①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲
 //A　　　　　　　　　　○　　　　　　　　　
 //B　　　　　　　　　○　○　　　　　　　　
 //C　　　　　　　　○　○　○　　　　　　　

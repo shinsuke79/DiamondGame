@@ -72,8 +72,7 @@ public class UserBoard {
 	}
 
 	public UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
-		// TODO 自動生成されたメソッド・スタブ
-		return null;
+		return boards[userCordinate.x][userCordinate.y];
 	}
 
 	/**
@@ -83,7 +82,7 @@ public class UserBoard {
 	 */
 	public List<String> getBoadString(){
 		List<String> result = new ArrayList<>();
-		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑭⑮⑯⑰⑱"));
+		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲"));
 		result.add(String.format("A                   %s                  ", s2cs(6,6)));
 		result.add(String.format("B                 %s  %s                ", s2cs(6,5), s2cs(5,6)));
 		result.add(String.format("C               %s  %s  %s              ", s2cs(6,4), s2cs(5,5), s2cs(4,6)));
@@ -154,6 +153,7 @@ public class UserBoard {
 	private void exactSpot(TeamColor team, Spot spot, UserCordinate uCordinate){
 		mLog.fine("exactSpot start team:%s spot:%s cordinate:%s", team, spot, uCordinate);
 
+		// すでに展開済みのSpotなら何もしない
 		if(boards[uCordinate.x][uCordinate.y] != null){
 			return;
 		}
@@ -314,6 +314,38 @@ public class UserBoard {
 		@Override
 		public String toString() {
 			return "UserCordinate [x=" + x + ", y=" + y + "]";
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + x;
+			result = prime * result + y;
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			UserCordinate other = (UserCordinate) obj;
+			if (x != other.x)
+				return false;
+			if (y != other.y)
+				return false;
+			return true;
+		}
+		@Override
+		public UserCordinate clone(){
+			try {
+				return (UserCordinate)super.clone();
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
 	}
 }
