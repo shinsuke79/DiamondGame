@@ -17,6 +17,7 @@ public class UserBoard {
 	private UserSpot[][]   boards;
 	private TeamColor      mainTeam;
 	private EnumMap<TeamColor, Set<UserPiece>> pieces;
+	private static final int USER_SPOT_NUM = 10;
 
 	DGLog   mLog;
 
@@ -61,8 +62,8 @@ public class UserBoard {
 	}
 
 	public UserSpot getUserSpotFromPiece(UserPiece uPiece){
-		for(int x=0; x<10; x++){
-			for(int y=0; y<10; y++){
+		for(int x=0; x<USER_SPOT_NUM; x++){
+			for(int y=0; y<USER_SPOT_NUM; y++){
 				if(boards[x][y]!=null && boards[x][y].piece == uPiece){
 					return boards[x][y];
 				}
@@ -73,6 +74,17 @@ public class UserBoard {
 
 	public UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
 		return boards[userCordinate.x][userCordinate.y];
+	}
+
+	private UserSpot getUserSpotFromBaseSpot(Spot baseSpot){
+		for(int x=0; x<USER_SPOT_NUM; x++){
+			for(int y=0; y<USER_SPOT_NUM; y++){
+				if(boards[x][y]!=null && boards[x][y].baseSpot.mCordinate.equals(baseSpot.mCordinate)){
+					return boards[x][y];
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -127,15 +139,44 @@ public class UserBoard {
 	}
 
 	public boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
-		return true; // TODO
-	}
+		// nullは許容する
+		if(currentSpot == null || nextSpot == null){
+			return false;
+		}
 
-	public UserSpot getNextSpotUsingDirection(UserSpot spot, Direction direction, int distance){
-		return null; // TODO
+		// UserSpotにSpotが登録されていないことは保証しない
+		assert currentSpot.baseSpot != null && nextSpot.baseSpot != null;
+
+		// Board的に移動できるか確認する
+		boolean result = cloneBoard.isAvailableMove(currentSpot.baseSpot, nextSpot.baseSpot);
+
+		return result;
 	}
 
 	public EnumMap<Direction, UserSpot> getAroundSpot(UserSpot spot, int distance){
-		return null; // TODO
+		EnumMap<Direction, UserSpot> ret = new EnumMap<>(Direction.class);
+
+		// cloneBoardにbaseSpotを指定して周囲8方向のSpotを取得
+		EnumMap<Direction,Spot> aroundSpot = cloneBoard.getAroundSpot(spot.baseSpot, distance);
+		// 各方向を操作
+		for(Direction d : Direction.values()){
+			Spot currentSpot = aroundSpot.get(d);
+			// Spotが存在しなければスキップ
+			if(currentSpot == null){
+				continue;
+			}
+			// 方角をUserSpot用に変換
+			Direction userDirection = d.getRelativeDirection(mainTeam);
+			// currentSpotに該当するSpotを検索
+			UserSpot userSpot = getUserSpotFromBaseSpot(currentSpot);
+			// これも見つからない可能性があるのでなければスキップ
+			if(userSpot == null){
+				continue;
+			}
+			// Userの方角とUserSpotで登録
+			ret.put(userDirection, userSpot);
+		}
+		return ret;
 	}
 
 	public Set<UserSpot> getMovableSpots(UserSpot spot){

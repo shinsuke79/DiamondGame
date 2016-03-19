@@ -264,7 +264,7 @@ public class Board implements Cloneable {
 	 * @param nextSpot
 	 * @return
 	 */
-	private boolean isAvailableMove(Spot currentSpot, Spot nextSpot) {
+	boolean isAvailableMove(Spot currentSpot, Spot nextSpot) {
 		mLog.fine("isAvailableMove start current:%s -> next:%s", currentSpot, nextSpot);
 
 		// どちらかのSpotが存在しなければfalse
@@ -282,10 +282,11 @@ public class Board implements Cloneable {
 			EnumMap<Direction,Spot> aroundSpots = getAroundSpot(currentSpot, i);
 			// その中に移動先があれば取得
 			for(Direction d : Direction.values()){
-				if(aroundSpots.get(nextSpot) != null){
+				if(aroundSpots.get(d) == nextSpot){
 					isContainAroundSpots = true;
 					distance             = i;
 					direction            = d;
+					break;
 				}
 			}
 		}
@@ -323,7 +324,7 @@ public class Board implements Cloneable {
 	 * @param distance
 	 * @return
 	 */
-	private EnumMap<Direction, Spot> getAroundSpot(Spot spot, int distance) {
+	EnumMap<Direction, Spot> getAroundSpot(Spot spot, int distance) {
 		mLog.fine("getAroundSpot start spot:%s distance:%d ", spot, distance);
 		assert spot != null;
 		assert distance == 1 || distance == 2;
