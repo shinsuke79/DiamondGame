@@ -27,7 +27,7 @@ public class UserBoard {
 		mLog.info("Create " + getClass().getSimpleName());
 
 		// ShallowCopy(DeepCopyはあえてしない)
-		this.cloneBoard   = (Board)board.clone();
+		this.cloneBoard   = board.cloneBoard();
 		changeMainTeam(mainTeam);
 	}
 

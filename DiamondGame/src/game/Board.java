@@ -41,6 +41,37 @@ public class Board implements Cloneable {
 		return null;
 	}
 
+	public Board cloneBoard() {
+		// Boardの生成
+		Board ret = new Board();
+
+		/* Spot配列の初期化 */
+		ret.mSpots = new Spot[13][13][13];
+
+		// Pieceのコピー(参照のみ)
+		ret.mRedPieces = new Piece[10];
+		for(int i=0;i<10;i++){ ret.mRedPieces[i]    = mRedPieces[i]; };
+		ret.mYellowPieces = new Piece[10];
+		for(int i=0;i<10;i++){ ret.mYellowPieces[i] = mYellowPieces[i]; };
+		ret.mGreenPieces = new Piece[10];
+		for(int i=0;i<10;i++){ ret.mGreenPieces[i]  = mGreenPieces[i]; };
+
+		// Spotsのコピー(状態はコピーするがSpotはnewする)
+		for(int x=0; x<13; x++){
+			for(int y=0; y<13; y++){
+				for(int z=0; z<13; z++){
+					Spot spot = mSpots[x][y][z];
+					if(spot != null){
+						ret.mSpots[x][y][z] = new Spot(spot.mTeam, spot.mPiece);
+						ret.mSpots[x][y][z].setCoordinate(x, y, z);
+					}
+				}
+			}
+		}
+
+		return ret;
+	}
+
 	/**
 	 * 自身の持つマス(Spot)、駒(Piece)を新たに配置します
 	 */
