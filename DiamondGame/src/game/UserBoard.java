@@ -12,11 +12,34 @@ import common.Direction;
 import common.TeamColor;
 import game.Board.Cordinate;
 import game.Board.Spot;
+import user.User;
 
+/**
+ * ダイアモンドゲームの盤を真上から見た(どのユーザーからの視点でもない){@link Board}に対し、
+ * あるユーザーの視点で見た盤(さらには頭の中で駒配置を変更した盤)を表現したクラス。<br>
+ * {@link User}が自分の一手を考える際、真上から見た{@link Board}では自分の手元に自陣があるわけではないこと、
+ * x,y,zの3軸でマス目の座標を考えなければならないことなどから、AIを作成するのが難しい。<br>
+ * {@link UserBoard}は以下の機能を提供する.<br>
+ * <ul>
+ * <li>ユーザー視点の盤(自分の陣地が手元=座標0, 0に来る)</li>
+ * <li>自由に駒配置を変更できる({@link Board}はGameMasterしか変更できない)</li>
+ * <li>駒配置を自由に変更した状態で他チームの視点に変更できる(自分の評価関数を他チームにも適用できる)</li>
+ * <li>自由に変更した駒配置を元に戻すことができる</li>
+ * </ul>
+ * @author 0000140105
+ *
+ */
 public class UserBoard {
+	/* 現在のUserSpotの状態が反映されたBoard */
 	private Board          cloneBoard;
-	private UserSpot[][]   boards;
 	private TeamColor      mainTeam;
+
+	/* 生成初期の状態が反映されたBoard */
+	private Board          initCloneBoard;
+	private TeamColor      initMainTeam;
+
+	/* UserSpot自身の状態 */
+	private UserSpot[][]   boards;
 	private EnumMap<TeamColor, Set<UserPiece>> pieces;
 	private static final int USER_SPOT_NUM = 10;
 
@@ -26,12 +49,31 @@ public class UserBoard {
 		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
 		mLog.info("Create " + getClass().getSimpleName());
 
-		// ShallowCopy(DeepCopyはあえてしない)
+		// Initで使用するBoardの情報
+		this.initCloneBoard = board.cloneBoard();
+		this.initMainTeam   = mainTeam;
+
+		// ユーザーが自由に変更できるBoardの情報
 		this.cloneBoard   = board.cloneBoard();
 		changeMainTeam(mainTeam);
 	}
 
 	/* -------- Userに公開するAPI --------  */
+
+	/**
+	 * UserPiece(駒)をThinkで渡された直後の状態に戻します.<br>
+	 * 視点も最初のチームに戻ります
+	 */
+	public void init(){
+		// ユーザーが自由に変更できるBoardの情報
+		this.cloneBoard   = this.initCloneBoard.cloneBoard();
+		changeMainTeam(this.initMainTeam);
+	}
+
+	/**
+	 * 現在のUserPiece(駒)配置を保ったまま、指定されたチームの視点に変更します
+	 * @param team
+	 */
 	public void changeMainTeam(TeamColor team){
 		mLog.fine("changeMainTeam(%s) start", team);
 		cloneBoard.logConsoleBoardImage();
@@ -56,40 +98,17 @@ public class UserBoard {
 		logConsoleUserBoardImage();
 	}
 
+	/**
+	 * [コンソール出力用] 現在のUserPiece(駒)の状態をコンソールに出力します
+	 */
 	public void logConsoleUserBoardImage() {
 		for(String s: getBoadString()){
 			mLog.info(s);
 		}
 	}
 
-	public UserSpot getUserSpotFromPiece(UserPiece uPiece){
-		for(int x=0; x<USER_SPOT_NUM; x++){
-			for(int y=0; y<USER_SPOT_NUM; y++){
-				if(boards[x][y]!=null && boards[x][y].piece == uPiece){
-					return boards[x][y];
-				}
-			}
-		}
-		return null;
-	}
-
-	public UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
-		return boards[userCordinate.x][userCordinate.y];
-	}
-
-	private UserSpot getUserSpotFromBaseSpot(Spot baseSpot){
-		for(int x=0; x<USER_SPOT_NUM; x++){
-			for(int y=0; y<USER_SPOT_NUM; y++){
-				if(boards[x][y]!=null && boards[x][y].baseSpot.mCordinate.equals(baseSpot.mCordinate)){
-					return boards[x][y];
-				}
-			}
-		}
-		return null;
-	}
-
 	/**
-	 * [コンソール出力用] 指定されたBoardの状況をコンソール用に生成します
+	 * [コンソール出力用] 現在のUserPiece(駒)の状態をコンソール用に生成します
 	 * @return
 	 */
 	public List<String> getBoadString(){
@@ -113,7 +132,8 @@ public class UserBoard {
 	}
 
 	/**
-	 * [コンソール出力用] 指定された座標のSpotを一文字の文字列に変換します spot to console string
+	 * [コンソール出力用] 指定された座標のUserSpot(マス目)を一文字の文字列に変換します<br>
+	 * spot to console string
 	 * @param x
 	 * @param y
 	 * @param z
@@ -135,34 +155,55 @@ public class UserBoard {
 		return "  ";
 	}
 
-	public Set<UserPiece> getPiecesFromTeam(TeamColor team){
-		return pieces.get(team);
-	}
-
-	public UserPiece getPieceFromUserCordinate(UserCordinate uCordinate) {
-		UserSpot userSpot = getUserSpotFromCordinate(uCordinate);
-		if(userSpot == null){
-			return null;
+	/**
+	 * 指定されたUserPiece(駒)が配置されているUserSpot(マス目)を返却します
+	 * @param uPiece 検索に使用する駒
+	 * @return uPieceが配置されているUserSpot(マス目)
+	 */
+	public UserSpot getUserSpotFromPiece(UserPiece uPiece){
+		for(int x=0; x<USER_SPOT_NUM; x++){
+			for(int y=0; y<USER_SPOT_NUM; y++){
+				if(boards[x][y]!=null && boards[x][y].piece == uPiece){
+					return boards[x][y];
+				}
+			}
 		}
-		return userSpot.piece;
+		return null;
 	}
 
-	public boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
-		// nullは許容する
-		if(currentSpot == null || nextSpot == null){
-			return false;
+	/**
+	 * 指定されたUserCordinate(マス目の座標)に該当するUserSpot(マス目)を返却します
+	 * @param userCordinate 検索に使用するマス目の座標
+	 * @return 指定された座標のUserSpot(マス目)
+	 */
+	public UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
+		return boards[userCordinate.x][userCordinate.y];
+	}
+
+	/**
+	 * [内部処理用関数] 指定されたbaseSpotに該当するUserSpot(マス目)を返却します
+	 * @param baseSpot
+	 * @return
+	 */
+	private UserSpot getUserSpotFromBaseSpot(Spot baseSpot){
+		for(int x=0; x<USER_SPOT_NUM; x++){
+			for(int y=0; y<USER_SPOT_NUM; y++){
+				if(boards[x][y]!=null && boards[x][y].baseSpot.mCordinate.equals(baseSpot.mCordinate)){
+					return boards[x][y];
+				}
+			}
 		}
-
-		// UserSpotにSpotが登録されていないことは保証しない
-		assert currentSpot.baseSpot != null && nextSpot.baseSpot != null;
-
-		// Board的に移動できるか確認する
-		boolean result = cloneBoard.isAvailableMove(currentSpot.baseSpot, nextSpot.baseSpot);
-
-		return result;
+		return null;
 	}
 
-	public EnumMap<Direction, UserSpot> getAroundSpot(UserSpot spot, int distance){
+	/**
+	 * 指定されたUserSpot(マス目)の周囲8方向のUserSpot(マス目)を返却します.<br>
+	 * 隣接したマス目と、1つ離れたマス目を選択できます
+	 * @param spot 周囲のマス目を取得したいマス目
+	 * @param distance 隣接したマス目を取得したい場合は1, 1つ離れたマス目を取得したい場合は2
+	 * @return 指定されたマス目の周囲8方向({@link Direction})のマス目.端の方向はnullを返却する
+	 */
+	public EnumMap<Direction, UserSpot> getAroundUserSpots(UserSpot spot, int distance){
 		EnumMap<Direction, UserSpot> ret = new EnumMap<>(Direction.class);
 
 		// cloneBoardにbaseSpotを指定して周囲8方向のSpotを取得
@@ -189,14 +230,73 @@ public class UserBoard {
 	}
 
 	/**
+	 * 指定されたUserSpot(マス目)が移動できるUserSpot(マス目)一覧を返却します
+	 * @param spot チーム問わず、移動可能なマス目を知りたいマス目
+	 * @return 移動可能なマス目の一覧.どこにも移動できなければ要素0の集合が返却される
+	 */
+	public Set<UserSpot> getMovableSpots(UserSpot spot){
+		Set<UserSpot> result = new HashSet<>();
+		getAroundUserSpots(spot, 1).values().stream()
+							.filter((us)->isAvailableMove(spot, us))
+							.forEach((us)->result.add(us));
+		getAroundUserSpots(spot, 2).values().stream()
+							.filter((us)->isAvailableMove(spot, us))
+							.forEach((us)->result.add(us));
+		return result;
+	}
+
+	/**
+	 * 指定されたチームのUserPiece(駒)をすべて返却します
+	 * @param team 返却したいチーム
+	 * @return 指定されたチームのUserPiece(駒)すべて({@link Set}型)
+	 */
+	public Set<UserPiece> getPiecesFromTeam(TeamColor team){
+		return new HashSet<>(pieces.get(team));
+	}
+
+	/**
+	 * 指定されたUserCordinate(マス目の座標)に配置されているUserPiece(駒)を返却します
+	 * @param uCordinate 駒を取得する座標
+	 * @return 指定された座標の駒. 駒やマス目が存在しなければnullを返却
+	 */
+	public UserPiece getPieceFromUserCordinate(UserCordinate uCordinate) {
+		UserSpot userSpot = getUserSpotFromCordinate(uCordinate);
+		if(userSpot == null){
+			return null;
+		}
+		return userSpot.piece;
+	}
+
+	/**
+	 * 指定されたUserSpot(マス目)が指定されたマス目に移動可能か返却します
+	 * @param currentSpot 移動元のマス目. 実際に移動元のUserSpotに駒が配置されている必要はない
+	 * @param nextSpot 移動先のマス目. 実際に配置されている駒も考慮して移動可能かチェックされる
+	 * @return 移動可能ならtrue, 不可能ならfalse
+	 */
+	public boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
+		// nullは許容する
+		if(currentSpot == null || nextSpot == null){
+			return false;
+		}
+
+		// UserSpotにSpotが登録されていないことは保証しない
+		assert currentSpot.baseSpot != null && nextSpot.baseSpot != null;
+
+		// Board的に移動できるか確認する
+		boolean result = cloneBoard.isAvailableMove(currentSpot.baseSpot, nextSpot.baseSpot);
+
+		return result;
+	}
+
+	/**
 	 * uSpot1とuSpot2が隣接していればTrueを返します
 	 * @param uSpot1 UserBoardに所属するSpot
 	 * @param uSpot2 UserBoardに所属するSpot
 	 * @return uSpot1とuSpot2が隣接していればTrue
 	 * uSpot1とuSpot2は必ず同じUserBoardに所属しているUserSpotを指定すること
 	 */
-	boolean isAdjacentSpot(UserSpot uSpot1, UserSpot uSpot2){
-		for(Entry<Direction, UserSpot> entry : getAroundSpot(uSpot1, 1).entrySet()){
+	public boolean isAdjacentSpot(UserSpot uSpot1, UserSpot uSpot2){
+		for(Entry<Direction, UserSpot> entry : getAroundUserSpots(uSpot1, 1).entrySet()){
 			if(entry.getValue() != null && entry.getValue() == uSpot2){
 				return true;
 			}
@@ -204,18 +304,13 @@ public class UserBoard {
 		return false;
 	}
 
-	public Set<UserSpot> getMovableSpots(UserSpot spot){
-		Set<UserSpot> result = new HashSet<>();
-		getAroundSpot(spot, 1).values().stream()
-							.filter((us)->isAvailableMove(spot, us))
-							.forEach((us)->result.add(us));
-		getAroundSpot(spot, 2).values().stream()
-							.filter((us)->isAvailableMove(spot, us))
-							.forEach((us)->result.add(us));
-		return result;
-	}
-
 	/* -------- Userには公開しないAPI --------  */
+	/**
+	 * [内部処理用関数] cloneBoardを使用してUserBoardを構築します
+	 * @param team
+	 * @param spot
+	 * @param uCordinate
+	 */
 	private void exactSpot(TeamColor team, Spot spot, UserCordinate uCordinate){
 		mLog.fine("exactSpot start team:%s spot:%s cordinate:%s", team, spot, uCordinate);
 
@@ -254,11 +349,20 @@ public class UserBoard {
 
 	}
 
+	/**
+	 * UserBoardに配置される駒を表したクラス
+	 * @author 0000140105
+	 *
+	 */
 	public class UserPiece{
 		private Piece basePiece;
 
 		/* -------- Userに公開するAPI --------  */
 
+		/**
+		 * 駒が誰のチームのものか返却する
+		 * @return 駒が所属するチーム
+		 */
 		public TeamColor geTeamColor(){
 			return basePiece.getmTeamColor();
 		}
@@ -279,6 +383,13 @@ public class UserBoard {
 		}
 	}
 
+	/**
+	 * UserBoardのマス目を表すクラス<br>
+	 * マス目には(x,y)の斜方座標({@link UserCordinate})が割り当てられている<br>
+	 * マス目に駒がある場合、UserPieceを保持する
+	 * @author 0000140105
+	 *
+	 */
 	public class UserSpot {
 		private Spot baseSpot;
 		private UserPiece piece;
@@ -286,14 +397,26 @@ public class UserBoard {
 
 		/* -------- Userに公開するAPI --------  */
 
+		/**
+		 * このマス目をゴールとするチームを返却します
+		 * @return このマス目をゴールとするチーム、なければnullを返却
+		 */
 		public TeamColor getTeamColor(){
 			return baseSpot.mTeam;
 		}
 
+		/**
+		 * このマスの座標を返却します
+		 * @return このマスの座標
+		 */
 		public UserCordinate getCordinate(){
 			return cordinate;
 		}
 
+		/**
+		 * このマスに配置されている駒を返却します
+		 * @return このマスに配置されている駒. なければnullを返却
+		 */
 		public UserPiece getPiece(){
 			return piece;
 		}
@@ -320,6 +443,11 @@ public class UserBoard {
 
 	}
 
+	/**
+	 * UserBoard上の座標を表すクラス. ユーザーの手元が(0,0)になるようになっている
+	 * @author 0000140105
+	 *
+	 */
 	public static class UserCordinate implements Cloneable{
 		private int x;
 		private int y;
@@ -328,15 +456,25 @@ public class UserBoard {
 			this.x = x;
 			this.y = y;
 		}
+
+		/**
+		 * この座標のX座標を返却する
+		 * @return
+		 */
 		public int getX(){
 			return x;
 		}
+
+		/**
+		 * この座標のY座標を返却する
+		 * @return
+		 */
 		public int getY(){
 			return y;
 		}
 
 		/**
-		 * 指定された方角へdistance移動させた座標を返却する
+		 * この座標を指定された方角へdistance分移動させた座標を返却する
 		 * @param cordinate
 		 * @param distance
 		 * @return

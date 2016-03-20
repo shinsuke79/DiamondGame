@@ -1,5 +1,13 @@
 package common;
 
+import game.Board;
+import game.UserBoard;
+
+/**
+ * {@link Board}/{@link UserBoard}共通で、あるマスから別のマスへの方角(8方向)を表す
+ * @author 0000140105
+ *
+ */
 public enum Direction {
 	RIGHT_FRONT(0), // ↗
 	RIGHT(1),       // →
@@ -16,9 +24,10 @@ public enum Direction {
 	}
 
 	/**
-	 * 自身が基準方角だったと仮定して、指定された色視点での方角を返す
-	 * 基準の方角は赤チームの視点としており、黄色は-1、緑は-2することで
-	 * その色視点の方向に変換できる
+	 * チーム視点でのこの方角を{@link Board}での真上から見た方角に返却する.<br>
+	 * 例えば黄色チーム視点での「右」は真上から見た{@link Board}視点では「左前」となる.<br>
+	 * ({@link Board}での基準方角は赤チームの視点としており、黄色は+4、緑は+2することで
+	 * その色視点の方向に変換できる)
 	 * @param color
 	 * @return
 	 */
