@@ -247,17 +247,48 @@ public class Board implements Cloneable {
 		// すべてのSpotに移動可能か確認する
 		Spot currentSpot = getSpotFromPiece(piece);
 		Spot nextSpot    = spots.get(0);
+		boolean isFirst  = true;
 		while(!spots.isEmpty()){
-			if(isAvailableMove(currentSpot, nextSpot)){
-				// 次の移動を確認する
-				mLog.warning("isMoveValid current:%s -> next:%s OK", currentSpot, nextSpot);
-				spots.remove(0);
-				currentSpot = nextSpot;
-				nextSpot    = !spots.isEmpty()? spots.get(0) : null;
+			boolean isAvailableMove = isAvailableMove(currentSpot, nextSpot);
+			boolean isAdjacent      = isAdjacentSpot(currentSpot, nextSpot);
+			if(isFirst){
+				// 移動距離に関わらず、移動できるならOK
+				if(isAvailableMove){
+					mLog.info("isMoveValid(first) OK current:%s -> next:%s ", currentSpot, nextSpot);
+					// SpotsからDelete
+					spots.remove(0);
+					// 距離1にも関わらず、更に移動しようとした場合は失敗とする
+					if(isAdjacentSpot(currentSpot, nextSpot) && !spots.isEmpty()){
+						mLog.severe("isMoveValid(first) Failed But you attempted to continue", currentSpot, nextSpot);
+						return false;
+					}
+					// 次の移動へ
+					currentSpot = nextSpot;
+					nextSpot    = !spots.isEmpty()? spots.get(0) : null;
+					isFirst     = false;
+					continue;
+				}else{
+					// 移動できないSpotだったら普通に失敗
+					mLog.severe("isMoveValid(first) Failed current:%s -> next:%s ", currentSpot, nextSpot);
+					return false;
+				}
 			}else{
-				// 移動できないSpotが登録されていたため失敗
-				mLog.warning("isMoveValid error(cant move) current:%s -> next:%s", currentSpot, nextSpot);
-				return false;
+				// 2回目以降の移動は距離2、かつ移動できなければならない
+				if(isAvailableMove && !isAdjacent){
+					mLog.info("isMoveValid OK current:%s -> next:%s ", currentSpot, nextSpot);
+					// SpotsからDelete
+					spots.remove(0);
+
+					// 次の移動へ
+					currentSpot = nextSpot;
+					nextSpot    = !spots.isEmpty()? spots.get(0) : null;
+					isFirst     = false;
+					continue;
+				}else{
+					// 移動できないSpot、もしくは隣接した移動なら失敗
+					mLog.severe("isMoveValid Failed current:%s -> next:%s", currentSpot, nextSpot);
+					return false;
+				}
 			}
 		}
 
@@ -346,6 +377,22 @@ public class Board implements Cloneable {
 			mLog.fine("getAroundSpot %s:\t%s ", e.getKey(), e.getValue());
 		}
 		return result;
+	}
+
+	/**
+	 * Spot1とSpot2が隣接していればTrueを返します
+	 * @param spot1 Boardに所属するSpot
+	 * @param spot2 Boardに所属するSpot
+	 * @return Spot1とSpot2が隣接していればTrue
+	 * spot1とspot2は必ず同じBoardに所属しているSpotを指定すること
+	 */
+	boolean isAdjacentSpot(Spot spot1, Spot spot2){
+		for(Entry<Direction, Spot> entry : getAroundSpot(spot1, 1).entrySet()){
+			if(entry.getValue() != null && entry.getValue() == spot2){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

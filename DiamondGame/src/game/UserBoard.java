@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import common.DGLog;
@@ -185,6 +186,22 @@ public class UserBoard {
 			ret.put(userDirection, userSpot);
 		}
 		return ret;
+	}
+
+	/**
+	 * uSpot1とuSpot2が隣接していればTrueを返します
+	 * @param uSpot1 UserBoardに所属するSpot
+	 * @param uSpot2 UserBoardに所属するSpot
+	 * @return uSpot1とuSpot2が隣接していればTrue
+	 * uSpot1とuSpot2は必ず同じUserBoardに所属しているUserSpotを指定すること
+	 */
+	boolean isAdjacentSpot(UserSpot uSpot1, UserSpot uSpot2){
+		for(Entry<Direction, UserSpot> entry : getAroundSpot(uSpot1, 1).entrySet()){
+			if(entry.getValue() != null && entry.getValue() == uSpot2){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Set<UserSpot> getMovableSpots(UserSpot spot){
