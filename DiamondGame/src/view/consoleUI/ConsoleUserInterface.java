@@ -284,6 +284,7 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		// 移動できる座標の候補一覧を取得
 		List<UserSpot> fromUserSpots =  userBoard.getPiecesFromTeam(humanUser.getMyTeam()).stream()
 										.map((up)->userBoard.getUserSpotFromPiece(up))
+										.filter((uSpot) -> userBoard.getMovableSpots(uSpot).size() > 0)
 										.collect(Collectors.toList());
 		List<UIBoardSpot> fromUISpots = fromUserSpots.stream()
 										.map((u)->UIBoardSpot.parseUserCordinate(u.getCordinate()))
