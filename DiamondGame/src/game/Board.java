@@ -476,6 +476,7 @@ public class Board implements Cloneable {
 		result.add("K                "+s2cs(2,9,7)+"  "+s2cs(2,8,8)+"  "+s2cs(2,7,9)+"              ");
 		result.add("L                  "+s2cs(1,9,8)+"  "+s2cs(1,8,9)+"                ");
 		result.add("M                    "+s2cs(0,9,9)+"                  ");
+		result.add(" ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑭⑮⑯⑰⑱⑲");
 		return result;
 	}
 	/**

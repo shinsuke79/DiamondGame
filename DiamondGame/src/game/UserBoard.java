@@ -89,7 +89,6 @@ public class UserBoard {
 
 	/**
 	 * [コンソール出力用] 指定されたBoardの状況をコンソール用に生成します
-	 * String.format使えばよかった…
 	 * @return
 	 */
 	public List<String> getBoadString(){
@@ -108,6 +107,7 @@ public class UserBoard {
 		result.add(String.format("K               %s  %s  %s              ", s2cs(2,0), s2cs(1,1), s2cs(0,2)));
 		result.add(String.format("L                 %s  %s                ", s2cs(1,0), s2cs(0,1)));
 		result.add(String.format("M                   %s                  ", s2cs(0,0)));
+		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲"));
 		return result;
 	}
 
