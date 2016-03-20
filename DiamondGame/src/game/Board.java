@@ -226,6 +226,14 @@ public class Board implements Cloneable {
 	public boolean isMoveValid(Move move) {
 		mLog.fine("isMoveValid start %s", move);
 
+		// エラーチェック
+		assert (move.getmUser() != null) && (move.getmTeam() != null);
+
+		// エラーチェック
+		if(move.mPiece == null || move.mMoveSpots == null || move.mMoveSpots.size() == 0){
+			return false;
+		}
+
 		// User型のPiece/Spotを共通型へ変換
 		Piece piece = move.mPiece.getBasePiece();
 		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m.getBaseCordinate())).collect(Collectors.toList());
@@ -351,7 +359,7 @@ public class Board implements Cloneable {
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
 				for(int z=0; z<13; z++){
-					if(mSpots[x][y][z].mTeam == team){
+					if(mSpots[x][y][z] != null && mSpots[x][y][z].mTeam == team){
 						result.add(mSpots[x][y][z]);
 					}
 				}
