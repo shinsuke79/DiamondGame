@@ -138,6 +138,14 @@ public class UserBoard {
 		return pieces.get(team);
 	}
 
+	public UserPiece getPieceFromUserCordinate(UserCordinate uCordinate) {
+		UserSpot userSpot = getUserSpotFromCordinate(uCordinate);
+		if(userSpot == null){
+			return null;
+		}
+		return userSpot.piece;
+	}
+
 	public boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
 		// nullは許容する
 		if(currentSpot == null || nextSpot == null){

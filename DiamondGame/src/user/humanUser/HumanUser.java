@@ -4,6 +4,8 @@ import common.DGLog;
 import common.TeamColor;
 import game.Move;
 import game.UserBoard;
+import game.UserBoard.UserCordinate;
+import game.UserBoard.UserSpot;
 import user.User;
 import user.UserInfo;
 import view.UserInterface;
@@ -35,8 +37,21 @@ public class HumanUser extends User {
 			uiHand = mUI.askHand(this, userBoard);
 		}
 
+		mLog.info("askHand end. %s ", uiHand);
+
 		// Moveに変換する
-		// TODO
+		// From
+		UserCordinate uCordinateFrom = UIBoardSpot.spotConvTable.getUserCordinateFromUiCordinate(uiHand.from.getLine(), uiHand.from.getColumn());
+		moveResult.mPiece = userBoard.getPieceFromUserCordinate(uCordinateFrom);
+		assert moveResult.mPiece != null;
+
+		// To
+		for(UIBoardSpot uiTo : uiHand.to){
+			UserCordinate uCordinateTo = UIBoardSpot.spotConvTable.getUserCordinateFromUiCordinate(uiTo.getLine(), uiTo.getColumn());
+			UserSpot uSpotTo = userBoard.getUserSpotFromCordinate(uCordinateTo);
+			assert uSpotTo != null;
+			moveResult.mMoveSpots.add(uSpotTo);
+		}
 
 		mLog.info("think end result:%s", moveResult);
 	}

@@ -438,7 +438,7 @@ public class Board implements Cloneable {
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
 				for(int z=0; z<13; z++){
-					if(mSpots[x][y][z].mPiece == piece){
+					if(mSpots[x][y][z] != null && mSpots[x][y][z].mPiece == piece){
 						return mSpots[x][y][z];
 					}
 				}

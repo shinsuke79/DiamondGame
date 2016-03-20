@@ -44,6 +44,17 @@ public interface UserInterface {
 			from = null;
 			to   = new ArrayList<>();
 		}
+		@Override
+		public String toString() {
+			StringBuilder result = new StringBuilder("UIHand [");
+			result.append(from.getValueStr());
+			for(UIBoardSpot uiSpot : to){
+				result.append(" => ");
+				result.append(uiSpot.getValueStr());
+			}
+			result.append("]");
+			return result.toString();
+		}
 	}
 
 	/**
@@ -55,7 +66,7 @@ public interface UserInterface {
 		private char line;
 		private int  column;
 		private boolean isValid;
-		static UiUserSpotConvTable spotConvTable = new UiUserSpotConvTable();
+		public static UiUserSpotConvTable spotConvTable = new UiUserSpotConvTable();
 
 		public UIBoardSpot() {
 			line  = 0;
@@ -172,7 +183,7 @@ public interface UserInterface {
 			}
 		}
 
-		static class UiUserSpotConvTable {
+		static public class UiUserSpotConvTable {
 			Set<UiUserSpotConvMap> mTable;
 
 			public UiUserSpotConvTable() {
@@ -262,12 +273,12 @@ public interface UserInterface {
 				mTable.add(new UiUserSpotConvMap(new UserCordinate(0, 0), 'M', 10));
 			}
 
-			UserCordinate getUserCordinateFromUiCordinate(int line, int column){
+			public UserCordinate getUserCordinateFromUiCordinate(int line, int column){
 				Optional<UiUserSpotConvMap> searchResult = mTable.stream().filter(map -> map.mUICordinateLine == line && map.mUICordinateClumn == column).findFirst();
 				return searchResult.get().mUserCordinate.clone();
 			}
 
-			Map<UiUserSpotKey, Integer> getUiCordinateFromUserCordinate(UserCordinate uCordinate){
+			public Map<UiUserSpotKey, Integer> getUiCordinateFromUserCordinate(UserCordinate uCordinate){
 				Optional<UiUserSpotConvMap> searchResult = mTable.stream().filter(map -> map.mUserCordinate.equals(uCordinate)).findFirst();
 				Map<UiUserSpotKey, Integer> result = new HashMap<>();
 				result.put(UiUserSpotKey.LINE,   searchResult.get().mUICordinateLine );
