@@ -9,16 +9,18 @@ import game.Board.Cordinate;
  *
  */
 public enum TeamColor {
-	RED("赤チーム",    new Cordinate(0,9,9)),
-	GREEN("緑チーム",  new Cordinate(9,9,0)),
-	YELLOW("黃チーム", new Cordinate(9,0,9));
+	RED("赤チーム",    "赤", new Cordinate(0,9,9)),
+	GREEN("緑チーム",  "緑", new Cordinate(9,9,0)),
+	YELLOW("黃チーム", "黄", new Cordinate(9,0,9));
 
 	static DGLog Log = new DGLog(TeamColor.class.getSimpleName());
 
 	String mName;
+	String mSimpleName;
 	Cordinate rootCordinate;
-	private TeamColor(String name, Cordinate root) {
+	private TeamColor(String name, String simpleName, Cordinate root) {
 		mName = name;
+		mSimpleName = simpleName;
 		rootCordinate = root;
 	}
 
@@ -28,6 +30,14 @@ public enum TeamColor {
 	 */
 	public String getName(){
 		return mName;
+	}
+
+	/**
+	 * このチームの日本語名(シンプル版)を返却します
+	 * @return 例) 緑
+	 */
+	public String getSimpleName(){
+		return mSimpleName;
 	}
 
 	/**

@@ -30,4 +30,12 @@ public class Piece {
 		return "Piece [mTeamColor=" + mTeamColor + ", mNum=" + mNum + "]";
 	}
 
+	/**
+	 * わかりやすい文字列で返します
+	 * @return 例) 緑3
+	 */
+	public String getNameStr(){
+		return String.format("%s%d", mTeamColor.getSimpleName(), mNum);
+	}
+
 }

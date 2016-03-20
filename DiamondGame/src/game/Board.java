@@ -648,7 +648,9 @@ public class Board implements Cloneable {
 		}
 		@Override
 		public String toString() {
-			return "Spot [mPiece=" + mPiece + ", mTeam=" + mTeam + ", mCordinate=" + mCordinate + "]";
+			return "Spot [Piece=" + (mPiece!=null ? mPiece.getNameStr() : "null") +
+					", GoalTeam=" + (mTeam != null ? mTeam.getSimpleName() : "null") +
+					", Cordinate=" + mCordinate.getNameStr() + "]";
 		}
 	}
 
@@ -772,6 +774,10 @@ public class Board implements Cloneable {
 		@Override
 		public String toString() {
 			return "Cordinate [x=" + x + ", y=" + y + ", z=" + z + "]";
+		}
+
+		public String getNameStr(){
+			return "[" + x + ", " + y + ", " + z + "]";
 		}
 	}
 

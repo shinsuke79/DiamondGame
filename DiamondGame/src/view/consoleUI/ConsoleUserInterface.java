@@ -275,6 +275,11 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 
 	@Override
 	public UIHand askHand(HumanUser humanUser, UserBoard userBoard) {
+		// ヘッダー表示
+		System.out.println();
+		System.out.println("↓=====================================================================================↓");
+		System.out.println("★★" + humanUser.getMyTeam().getName()+"のターン★★");
+
 		// コンソールに現在の状況を表示
 		userBoard.logConsoleUserBoardImage();
 
@@ -382,6 +387,9 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		UIHand result = new UIHand();
 		result.from = fromUiSpot;
 		result.to   = to;
+
+		System.out.println();
+		System.out.println("↑=====================================================================================↑");
 
 		return result;
 	}

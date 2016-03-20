@@ -76,7 +76,7 @@ public class UserBoard {
 	 */
 	public void changeMainTeam(TeamColor team){
 		mLog.fine("changeMainTeam(%s) start", team);
-		cloneBoard.logConsoleBoardImage();
+		// cloneBoard.logConsoleBoardImage();
 
 		this.mainTeam     = team;
 		this.boards       = new UserSpot[10][10];
@@ -95,7 +95,7 @@ public class UserBoard {
 		exactSpot(team, rootSpot, new UserCordinate(0, 0));
 
 		mLog.fine("changeMainTeam(%s) end", team);
-		logConsoleUserBoardImage();
+		// logConsoleUserBoardImage();
 	}
 
 	/**
@@ -438,7 +438,8 @@ public class UserBoard {
 
 		@Override
 		public String toString() {
-			return "UserSpot [baseSpot=" + baseSpot + ", piece=" + piece + ", cordinate=" + cordinate + "]";
+			return "UserSpot [piece=" + piece +
+					", cordinate=" + (cordinate!=null ? cordinate.getNameStr() : "null") + "]";
 		}
 
 	}
@@ -519,6 +520,11 @@ public class UserBoard {
 		public String toString() {
 			return "UserCordinate [x=" + x + ", y=" + y + "]";
 		}
+
+		public String getNameStr(){
+			return "[" + x + ", " + y + "]";
+		}
+
 		@Override
 		public int hashCode() {
 			final int prime = 31;
