@@ -36,6 +36,14 @@ public class Move {
 		mMoveSpots = new ArrayList<>();
 	}
 
+	public Move cloneMove(){
+		Move clone = new Move(mUser);
+		clone.mTeam      = this.mTeam;
+		clone.mPiece     = this.mPiece;
+		clone.mMoveSpots = new ArrayList<>(this.mMoveSpots);
+		return clone;
+	}
+
 	@Override
 	public String toString() {
 		return "Move [mTeam=" + mTeam.getName() + ", mPiece=" + mPiece + ", mMoveSpots=" + mMoveSpots + "]";

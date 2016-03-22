@@ -85,12 +85,15 @@ public class UserBoard {
 	 * 視点も最初のチームに戻ります
 	 */
 	public void init(){
+		mLog.info("init Start");
 		this.mCurrentCloneBoard = this.mInitCloneBoard.cloneBoard();
 		this.mCurrentTeam       = this.mInitTeam;
 
 		this.clearBoards();
 		this.clearSpotTablePiece();
 		this.syncBoards();
+
+		mLog.info("init End");
 	}
 
 	/**
@@ -113,12 +116,22 @@ public class UserBoard {
 	 * {@link Move}を使用してUserBoardの状態を変更します
 	 * @param move
 	 */
-	public void move(Move move){
-		// TODO moveを使用してmCurrentCloneBoardの更新
+	public boolean move(Move move){
+		mLog.info("move Start");
+		// 移動できるかチェック
+		if(!mCurrentCloneBoard.isMoveValid(move)){
+			mLog.info("move End ERROR");
+			return false;
+		}
+		// 移動させる
+		mCurrentCloneBoard.move(move);
 
 		this.clearBoards();
 		this.clearSpotTablePiece();
 		this.syncBoards();
+
+		mLog.info("move End");
+		return true;
 	}
 
 	/**
@@ -326,6 +339,15 @@ public class UserBoard {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * 指定されたチームのPointを返却します
+	 * @param teamColor
+	 * @return
+	 */
+	public int getPoint(TeamColor teamColor) {
+		return mCurrentCloneBoard.getPoint(teamColor);
 	}
 
 	/* -------- Userには公開しないAPI --------  */

@@ -73,6 +73,8 @@ public class Board implements Cloneable {
 			}
 		}
 
+		ret.mPointCalculator = this.mPointCalculator;
+
 		return ret;
 	}
 
@@ -201,6 +203,30 @@ public class Board implements Cloneable {
 	}
 
 	/**
+	 * 指定されたチームのゴールに到達している駒の数を返す
+	 * @param teamColor
+	 * @return
+	 */
+	public int getGoalPieceCount(TeamColor teamColor) {
+		// 指定されたSpotに自分のPieceがどれだけ乗っているかカウントする
+		Set<Spot> teamSpots = getTeamGoalSpot(teamColor);
+		long point = teamSpots.stream()
+		.filter((s)->(s.mPiece != null) && (s.mPiece.getmTeamColor() == teamColor) )
+		.count();
+		mLog.fine("getTeamPoint %s -> %d", teamColor.getName(), point);
+		return (int)point;
+	}
+
+	/**
+	 * 指定されたチームのポイントを返します
+	 * @param teamColor
+	 * @return
+	 */
+	public int getPoint(TeamColor teamColor) {
+		return mPointCalculator.calcTeamPoint(teamColor, this);
+	}
+
+	/**
 	 * 自身の持つマス(Spot)、駒(Piece)を新たに配置します
 	 */
 	public void placePiece() {
@@ -252,27 +278,12 @@ public class Board implements Cloneable {
 	}
 
 	/**
-	 * 指定されたチームのゴールに到達している駒の数を返す
-	 * @param teamColor
-	 * @return
-	 */
-	public int getTeamPoint(TeamColor teamColor) {
-		// 指定されたSpotに自分のPieceがどれだけ乗っているかカウントする
-		Set<Spot> teamSpots = getTeamGoalSpot(teamColor);
-		long point = teamSpots.stream()
-		.filter((s)->(s.mPiece != null) && (s.mPiece.getmTeamColor() == teamColor) )
-		.count();
-		mLog.fine("getTeamPoint %s -> %d", teamColor.getName(), point);
-		return (int)point;
-	}
-
-	/**
 	 * 指定されたチームが既にゴール済みならtrueを返す
 	 * @param teamColor
 	 * @return
 	 */
 	public boolean isFinishedTeam(TeamColor teamColor){
-		boolean result = getTeamPoint(teamColor) == 10;
+		boolean result = getGoalPieceCount(teamColor) == 10;
 		mLog.fine("isFinishedTeam? %s -> %b", teamColor.getName(), result);
 		return result;
 	}

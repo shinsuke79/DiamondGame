@@ -5,6 +5,7 @@ import java.util.List;
 
 import common.DGLog;
 import user.humanUser.HumanUser;
+import user.yone.hillClimbingUser.HillClimbingUser;
 import user.yone.obakaUser.ObakaUser;
 
 public class UserManager {
@@ -30,7 +31,7 @@ public class UserManager {
 	public User createUser(UserInfo userInfo) {
 		switch(userInfo.getName()){
 		case "Player1": return new HumanUser(userInfo);
-		case "Player2": return new ObakaUser(userInfo);
+		case "Player2": return new HillClimbingUser(userInfo);
 		case "Player3": return new ObakaUser(userInfo);
 		}
 		return new HumanUser(userInfo);

@@ -198,7 +198,7 @@ public class Game {
 	}
 
 	public int getTeamPoint(TeamColor teamColor){
-		int teamPoint = mBoard.getTeamPoint(teamColor);
+		int teamPoint = mBoard.getGoalPieceCount(teamColor);
 		mLog.fine("getTeamPoint %s -> %d", teamColor, teamPoint);
 		return teamPoint;
 	}
