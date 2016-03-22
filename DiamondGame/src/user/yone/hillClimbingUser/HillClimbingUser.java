@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import common.DGLog;
 import common.TeamColor;
@@ -43,7 +44,8 @@ public class HillClimbingUser extends User {
 
 		// 移動できる駒を取得
 		Set<UserPiece> movableUserPieces = userBoard.getMovableUserPieces(getMyTeam());
-		say("単託するPieceは%dつ。",movableUserPieces.size());
+		say("探索するPieceは%dつ[%s]",movableUserPieces.size(), movableUserPieces.stream()
+											.map((pi)->pi.getNameStr()).collect(Collectors.toList()));
 
 		// 移動できる駒が移動できるSpotsを探し、そこからMoveを洗い出す
 		for(UserPiece uPiece : movableUserPieces){
@@ -55,19 +57,20 @@ public class HillClimbingUser extends User {
 			Set<UserSpot> movableSpots = userBoard.getMovableSpots(userSpot);
 			say("移動先の候補は%dつ。", movableSpots.size());
 			for(UserSpot nextSpot : movableSpots){
-				say("移動先の%sから作られるMoveを洗い出す", nextSpot);
+				say("移動先の%sから作られるMoveを洗い出す", nextSpot.getCordinate());
 				// 移動先候補から作成されうるMove一覧を取得
 				List<Move> moveList =  createMoves(userBoard, uPiece, userSpot, nextSpot);
-				say("移動の%s->%sから作られたMoveは%dつ。", userSpot, nextSpot, moveList.size());
+				say("移動の%s->%sから作られたMoveは%dつ。", userSpot.getCordinate(), nextSpot.getCordinate(), moveList.size());
 				// 各MoveをNodeにしてNodeListに追加(その時hnも更新)
 				for(Move move : moveList){
-					say("%s", move);
 					Node node = new Node();
 					userBoard.init();
 					userBoard.move(move);
 					node.hn = userBoard.getPoint(getMyTeam());
+					userBoard.init();
 					node.moveList.add(move);
 					nodeList.add(node);
+					say("%sのPointは%d", move, node.hn);
 				}
 			}
 		}

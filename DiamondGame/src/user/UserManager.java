@@ -30,7 +30,7 @@ public class UserManager {
 
 	public User createUser(UserInfo userInfo) {
 		switch(userInfo.getName()){
-		case "Player1": return new HumanUser(userInfo);
+		case "Player1": return new HillClimbingUser(userInfo);
 		case "Player2": return new HillClimbingUser(userInfo);
 		case "Player3": return new ObakaUser(userInfo);
 		}

@@ -2,6 +2,7 @@ package game;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import common.TeamColor;
 import game.UserBoard.UserPiece;
@@ -46,6 +47,8 @@ public class Move {
 
 	@Override
 	public String toString() {
-		return "Move [mTeam=" + mTeam.getName() + ", mPiece=" + mPiece + ", mMoveSpots=" + mMoveSpots + "]";
+		return "Move [mTeam=" + mTeam.getName()
+			+ ", mPiece=" + mPiece != null ? mPiece.getNameStr():"null"
+			+ ", mMoveSpots=" + mMoveSpots.stream().map((uSpot)->uSpot.getCordinate()).collect(Collectors.toList()) + "]";
 	}
 }

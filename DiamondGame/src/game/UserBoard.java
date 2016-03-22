@@ -85,7 +85,7 @@ public class UserBoard {
 	 * 視点も最初のチームに戻ります
 	 */
 	public void init(){
-		mLog.info("init Start");
+		mLog.fine("init Start");
 		this.mCurrentCloneBoard = this.mInitCloneBoard.cloneBoard();
 		this.mCurrentTeam       = this.mInitTeam;
 
@@ -93,7 +93,7 @@ public class UserBoard {
 		this.clearSpotTablePiece();
 		this.syncBoards();
 
-		mLog.info("init End");
+		mLog.fine("init End");
 	}
 
 	/**
@@ -117,20 +117,20 @@ public class UserBoard {
 	 * @param move
 	 */
 	public boolean move(Move move){
-		mLog.info("move Start");
+		mLog.fine("move Start");
 		// 移動できるかチェック
-		if(!mCurrentCloneBoard.isMoveValid(move)){
+		if(!mCurrentCloneBoard.isMoveValid(move, true)){
 			mLog.info("move End ERROR");
 			return false;
 		}
 		// 移動させる
-		mCurrentCloneBoard.move(move);
+		mCurrentCloneBoard.move(move, true);
 
 		this.clearBoards();
 		this.clearSpotTablePiece();
 		this.syncBoards();
 
-		mLog.info("move End");
+		mLog.fine("move End");
 		return true;
 	}
 
@@ -440,6 +440,21 @@ public class UserBoard {
 
 		// ルートから、すべてのSpotの右前、左上と展開していく
 		exactSpot(mCurrentTeam, rootSpot, new UserCordinate(0, 0));
+
+		// CurrentCloneBoardのSpotとCurrentBoardのBaseBoardの参照を同期する
+		for(int x=0; x<13; x++){
+			for(int y=0; y<13; y++){
+				for(int z=0; z<13; z++){
+					Spot spot = mCurrentCloneBoard.mSpots[x][y][z];
+					if(spot != null){
+						UserSpot userSpot = mUserSpotTable.get(spot.mCordinate);
+						if(userSpot != null){
+							userSpot.baseSpot = spot;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/**

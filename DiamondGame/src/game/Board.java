@@ -29,7 +29,7 @@ public class Board implements Cloneable {
 
 	public Board() {
 		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
-		mLog.info("Create " + getClass().getSimpleName());
+		mLog.fine("Create " + getClass().getSimpleName());
 	}
 
 	/**
@@ -236,10 +236,16 @@ public class Board implements Cloneable {
 	}
 
 	public void move(Move move) {
-		mLog.info("move start %s", move);
+		move(move, false);
+	}
+
+	public void move(Move move, boolean isSilent){
+		if(!isSilent){
+			mLog.info("move start %s", move);
+		}
 
 		// 移動が妥当であることの確認
-		if(!isMoveValid(move)){
+		if(!isMoveValid(move, isSilent)){
 			// ありえない
 			assert false;
 			return;
@@ -258,9 +264,11 @@ public class Board implements Cloneable {
 			nextSpot    = !spots.isEmpty()? spots.get(0) : null;
 		}
 
-		mLog.info("move end %s", move);
-		logConsoleBoardImage();
-		logTeamPoints();
+		if(!isSilent){
+			mLog.info("move end %s", move);
+			logConsoleBoardImage();
+			logTeamPoints();
+		}
 	}
 
 	/**
@@ -303,7 +311,7 @@ public class Board implements Cloneable {
 	 * @param move
 	 * @return
 	 */
-	public boolean isMoveValid(Move move) {
+	public boolean isMoveValid(Move move, boolean isSilent) {
 		mLog.fine("isMoveValid start %s", move);
 
 		// エラーチェック
@@ -334,7 +342,9 @@ public class Board implements Cloneable {
 			if(isFirst){
 				// 移動距離に関わらず、移動できるならOK
 				if(isAvailableMove){
-					mLog.info("isMoveValid(first) OK current:%s -> next:%s ", currentSpot, nextSpot);
+					if(!isSilent){
+						mLog.info("isMoveValid(first) OK current:%s -> next:%s ", currentSpot, nextSpot);
+					}
 					// SpotsからDelete
 					spots.remove(0);
 					// 距離1にも関わらず、更に移動しようとした場合は失敗とする
@@ -355,7 +365,9 @@ public class Board implements Cloneable {
 			}else{
 				// 2回目以降の移動は距離2、かつ移動できなければならない
 				if(isAvailableMove && !isAdjacent){
-					mLog.info("isMoveValid OK current:%s -> next:%s ", currentSpot, nextSpot);
+					if(!isSilent){
+						mLog.info("isMoveValid OK current:%s -> next:%s ", currentSpot, nextSpot);
+					}
 					// SpotsからDelete
 					spots.remove(0);
 
@@ -375,6 +387,15 @@ public class Board implements Cloneable {
 		// 移動可能
 		mLog.fine("isMoveValid end(valid)");
 		return true;
+	}
+
+	/**
+	 * 指定されたMoveが移動可能であればtrueを返す
+	 * @param move
+	 * @return
+	 */
+	public boolean isMoveValid(Move move) {
+		return isMoveValid(move, false);
 	}
 
 	/**
