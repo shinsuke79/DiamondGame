@@ -1,9 +1,12 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.IntPredicate;
@@ -22,6 +25,7 @@ public class Board implements Cloneable {
 	Piece[] mYellowPieces;
 	Piece[] mGreenPieces;
 	DGLog   mLog;
+	PointCalculator mPointCalculator;
 
 	public Board() {
 		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
@@ -80,6 +84,9 @@ public class Board implements Cloneable {
 
 		/* Spot配列の初期化 */
 		mSpots = new Spot[13][13][13];
+
+		/* Calculatorの生成 */
+		mPointCalculator = new PointCalculator();
 
 		/* Piece配列の初期化 */
 		mRedPieces = new Piece[10];
@@ -153,14 +160,44 @@ public class Board implements Cloneable {
 			}
 		}
 
+		/* PointCalculatorに情報を登録 */
+		for(int x=0; x<13; x++){
+			for(int y=0; y<13; y++){
+				for(int z=0; z<13; z++){
+					Spot spot = mSpots[x][y][z];
+					if(spot != null){
+						// ゴールのチームならその座標を登録
+						if(spot.mTeam != null){
+							mPointCalculator.addGoalSpot(spot.mTeam, spot.mCordinate);
+						}
+						// 駒の初期値であればその位置の座標を登録
+						if(spot.mPiece != null){
+							mPointCalculator.addPieceInitCordinate(spot.mPiece, spot.mCordinate);
+						}
+					}
+				}
+			}
+		}
+
 		mLog.config("createBaseBoard end");
 		logConsoleBoardImage();
+		logTeamPoints();
 	}
 
 	public void logConsoleBoardImage() {
 		for(String s: getBoadString()){
 			mLog.info(s);
 		}
+	}
+
+	public void logTeamPoints(){
+		Map<TeamColor, Integer> points = new HashMap<>();
+		for(TeamColor teamColor : TeamColor.values()){
+			points.put(teamColor, mPointCalculator.calcTeamPoint(teamColor, this));
+		}
+		mLog.info("Point: 赤:%d  黄:%d  緑:%d", points.get(TeamColor.RED),
+												points.get(TeamColor.YELLOW),
+												points.get(TeamColor.GREEN));
 	}
 
 	/**
@@ -197,6 +234,7 @@ public class Board implements Cloneable {
 
 		mLog.info("move end %s", move);
 		logConsoleBoardImage();
+		logTeamPoints();
 	}
 
 	/**
@@ -512,7 +550,7 @@ public class Board implements Cloneable {
 	 * @param piece
 	 * @return
 	 */
-	private Spot getSpotFromPiece(Piece piece) {
+	Spot getSpotFromPiece(Piece piece) {
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
 				for(int z=0; z<13; z++){
@@ -521,6 +559,20 @@ public class Board implements Cloneable {
 					}
 				}
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * 指定されたTeamのPiece一覧を返却します
+	 * @param color
+	 * @return
+	 */
+	Set<Piece> getPiecesFromTeam(TeamColor color){
+		switch(color){
+		case GREEN:  return new HashSet<>(Arrays.asList(mGreenPieces));
+		case RED:    return new HashSet<>(Arrays.asList(mRedPieces));
+		case YELLOW: return new HashSet<>(Arrays.asList(mYellowPieces));
 		}
 		return null;
 	}
