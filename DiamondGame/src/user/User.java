@@ -12,11 +12,12 @@ public abstract class User implements Runnable {
 	private final static int WAIT_MSEC = 1;
 
 	// 子に見せる変数
-	protected TeamColor  mMyTeam;
-	protected GameConfig mRule;
-	protected int        mMyOrder;
+	// 基本的にGetterを使用してもらう
 
 	// 子にも見せない変数
+	private   TeamColor  mMyTeam;
+	private   GameConfig mRule;
+	private   int        mMyOrder;
 	private   Thread     mThread;
 	private   DGLog      mLog;
 	private   State      mState;

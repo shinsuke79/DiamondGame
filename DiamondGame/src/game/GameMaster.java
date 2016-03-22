@@ -127,6 +127,7 @@ public class GameMaster implements Runnable {
 		// Moveが妥当なものか確認
 		if(!checkMove(mMove)){
 			// TODO 正しくない場合は適当な駒を１つ動かすように設定
+			assert false;
 		}
 
 		// ボードの駒を動かす

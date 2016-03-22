@@ -225,10 +225,24 @@ public class UserBoard {
 	 * @return 移動可能なマス目の一覧.どこにも移動できなければ要素0の集合が返却される
 	 */
 	public Set<UserSpot> getMovableSpots(UserSpot spot){
+		return getMovableSpots(spot, true);
+	}
+
+	/**
+	 * 指定されたUserSpot(マス目)が移動できるUserSpot(マス目)一覧を返却します
+	 * @param spot チーム問わず、移動可能なマス目を知りたいマス目
+	 * @param isFirst spotがすでに一回移動した場合のケースならfalseを設定(移動範囲1が除外される)
+	 * @return 移動可能なマス目の一覧.どこにも移動できなければ要素0の集合が返却される
+	 */
+	public Set<UserSpot> getMovableSpots(UserSpot spot, boolean isFirst){
 		Set<UserSpot> result = new HashSet<>();
-		getAroundUserSpots(spot, 1).values().stream()
-							.filter((us)->isAvailableMove(spot, us))
-							.forEach((us)->result.add(us));
+		// 最初は移動範囲１も含める
+		if(isFirst){
+			getAroundUserSpots(spot, 1).values().stream()
+			.filter((us)->isAvailableMove(spot, us))
+			.forEach((us)->result.add(us));
+		}
+		// 移動範囲２はいつでも取得できる
 		getAroundUserSpots(spot, 2).values().stream()
 							.filter((us)->isAvailableMove(spot, us))
 							.forEach((us)->result.add(us));
@@ -479,6 +493,10 @@ public class UserBoard {
 		@Override
 		public String toString() {
 			return basePiece.toString();
+		}
+
+		public String getNameStr() {
+			return basePiece.getNameStr();
 		}
 	}
 
