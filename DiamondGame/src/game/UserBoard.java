@@ -2,8 +2,10 @@ package game;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -30,32 +32,50 @@ import user.User;
  *
  */
 public class UserBoard {
-	/* 現在のUserSpotの状態が反映されたBoard */
-	private Board          cloneBoard;
-	private TeamColor      mainTeam;
-
-	/* 生成初期の状態が反映されたBoard */
-	private Board          initCloneBoard;
-	private TeamColor      initMainTeam;
-
-	/* UserSpot自身の状態 */
-	private UserSpot[][]   boards;
-	private EnumMap<TeamColor, Set<UserPiece>> pieces;
+	/* 定数定義 */
 	private static final int USER_SPOT_NUM = 10;
 
+	/* 現在のUserSpotの状態が反映されたBoard */
+	private Board          mCurrentCloneBoard;
+	private TeamColor      mCurrentTeam;
+
+	/* UserSpot自身の状態 */
+	private UserSpot[][]                       mCurrentBoard;
+	private EnumMap<TeamColor, Set<UserPiece>> mPieceTable;
+	private Map<Cordinate, UserSpot>           mUserSpotTable;
+
+	/* 生成初期の状態が反映されたBoard */
+	private Board          mInitCloneBoard;
+	private TeamColor      mInitTeam;
+
+	/* デバッグ用 */
 	DGLog   mLog;
 
 	UserBoard(TeamColor mainTeam, Board board) {
+		// ログシステムの生成
 		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
 		mLog.info("Create " + getClass().getSimpleName());
 
-		// Initで使用するBoardの情報
-		this.initCloneBoard = board.cloneBoard();
-		this.initMainTeam   = mainTeam;
+		// Initで使用するBoardの初期化
+		this.mInitCloneBoard = board.cloneBoard();
+		this.mInitTeam       = mainTeam;
 
-		// ユーザーが自由に変更できるBoardの情報
-		this.cloneBoard   = board.cloneBoard();
-		changeMainTeam(mainTeam);
+		// テーブル関係の初期化
+		this.mCurrentBoard   = new UserSpot[USER_SPOT_NUM][USER_SPOT_NUM];
+		this.mPieceTable     = new EnumMap<>(TeamColor.class);
+		for(TeamColor tc: TeamColor.values()){
+			mPieceTable.put(tc, new HashSet<>());
+		}
+		this.mUserSpotTable  = new HashMap<>();
+
+		// CurrentBoardとTeamの設定
+		this.mCurrentCloneBoard = this.mInitCloneBoard.cloneBoard();
+		this.mCurrentTeam       = this.mInitTeam;
+
+		// CloneBoardの情報を使用してBoardを生成する
+		this.clearBoards();
+		this.clearSpotTablePiece();
+		this.syncBoards();
 	}
 
 	/* -------- Userに公開するAPI --------  */
@@ -65,9 +85,12 @@ public class UserBoard {
 	 * 視点も最初のチームに戻ります
 	 */
 	public void init(){
-		// ユーザーが自由に変更できるBoardの情報
-		this.cloneBoard   = this.initCloneBoard.cloneBoard();
-		changeMainTeam(this.initMainTeam);
+		this.mCurrentCloneBoard = this.mInitCloneBoard.cloneBoard();
+		this.mCurrentTeam       = this.mInitTeam;
+
+		this.clearBoards();
+		this.clearSpotTablePiece();
+		this.syncBoards();
 	}
 
 	/**
@@ -76,59 +99,26 @@ public class UserBoard {
 	 */
 	public void changeMainTeam(TeamColor team){
 		mLog.fine("changeMainTeam(%s) start", team);
-		// cloneBoard.logConsoleBoardImage();
 
-		this.mainTeam     = team;
-		this.boards       = new UserSpot[10][10];
-		this.pieces       = new EnumMap<>(TeamColor.class);
-		for(TeamColor tc: TeamColor.values()){
-			pieces.put(tc, new HashSet<>());
-		}
+		this.mCurrentTeam = team;
 
-		/* 各チームのベース地点を0,0として、UserSpotにSpotを登録してく
-		   SpotにPieceが配置されていれば、UserSpotに変換してUserSpotに登録する */
-
-		// チームごとのルートを取得
-		Spot rootSpot = cloneBoard.getSpotFromCordinate(mainTeam.getRootCordinate());
-
-		// ルートから、すべてのSpotの右前、左上と展開していく
-		exactSpot(team, rootSpot, new UserCordinate(0, 0));
+		this.clearBoards();
+		this.clearSpotTablePiece();
+		this.syncBoards();
 
 		mLog.fine("changeMainTeam(%s) end", team);
-		// logConsoleUserBoardImage();
 	}
 
 	/**
-	 * [コンソール出力用] 現在のUserPiece(駒)の状態をコンソールに出力します
+	 * {@link Move}を使用してUserBoardの状態を変更します
+	 * @param move
 	 */
-	public void logConsoleUserBoardImage() {
-		for(String s: getBoadString()){
-			mLog.info(s);
-		}
-	}
+	public void move(Move move){
+		// TODO moveを使用してmCurrentCloneBoardの更新
 
-	/**
-	 * [コンソール出力用] 現在のUserPiece(駒)の状態をコンソール用に生成します
-	 * @return
-	 */
-	public List<String> getBoadString(){
-		List<String> result = new ArrayList<>();
-		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲"));
-		result.add(String.format("A                   %s                  ", s2cs(6,6)));
-		result.add(String.format("B                 %s  %s                ", s2cs(6,5), s2cs(5,6)));
-		result.add(String.format("C               %s  %s  %s              ", s2cs(6,4), s2cs(5,5), s2cs(4,6)));
-		result.add(String.format("D %s  %s  %s  %s  %s  %s  %s  %s  %s  %s", s2cs(9,0), s2cs(8,1), s2cs(7,2), s2cs(6,3), s2cs(5,4), s2cs(4,5), s2cs(3,6), s2cs(2,7), s2cs(1,8), s2cs(0,9)));
-		result.add(String.format("E   %s  %s  %s  %s  %s  %s  %s  %s  %s  ", s2cs(8,0), s2cs(7,1), s2cs(6,2), s2cs(5,3), s2cs(4,4), s2cs(3,5), s2cs(2,6), s2cs(1,7), s2cs(0,8)));
-		result.add(String.format("F     %s  %s  %s  %s  %s  %s  %s  %s    ", s2cs(7,0), s2cs(6,1), s2cs(5,2), s2cs(4,3), s2cs(3,4), s2cs(2,5), s2cs(1,6), s2cs(0,7)));
-		result.add(String.format("G       %s  %s  %s  %s  %s  %s  %s      ", s2cs(6,0), s2cs(5,1), s2cs(4,2), s2cs(3,3), s2cs(2,4), s2cs(1,5), s2cs(0,6)));
-		result.add(String.format("H         %s  %s  %s  %s  %s  %s        ", s2cs(5,0), s2cs(4,1), s2cs(3,2), s2cs(2,3), s2cs(1,4), s2cs(0,5)));
-		result.add(String.format("I           %s  %s  %s  %s  %s          ", s2cs(4,0), s2cs(3,1), s2cs(2,2), s2cs(1,3), s2cs(0,4)));
-		result.add(String.format("J             %s  %s  %s  %s            ", s2cs(3,0), s2cs(2,1), s2cs(1,2), s2cs(0,3)));
-		result.add(String.format("K               %s  %s  %s              ", s2cs(2,0), s2cs(1,1), s2cs(0,2)));
-		result.add(String.format("L                 %s  %s                ", s2cs(1,0), s2cs(0,1)));
-		result.add(String.format("M                   %s                  ", s2cs(0,0)));
-		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲"));
-		return result;
+		this.clearBoards();
+		this.clearSpotTablePiece();
+		this.syncBoards();
 	}
 
 	/**
@@ -140,7 +130,7 @@ public class UserBoard {
 	 * @return
 	 */
 	private String s2cs(int x, int y){
-		UserSpot spot = boards[x][y];
+		UserSpot spot = mCurrentBoard[x][y];
 		if(spot == null){
 			return "  ";
 		}else if(spot.piece != null){
@@ -163,8 +153,8 @@ public class UserBoard {
 	public UserSpot getUserSpotFromPiece(UserPiece uPiece){
 		for(int x=0; x<USER_SPOT_NUM; x++){
 			for(int y=0; y<USER_SPOT_NUM; y++){
-				if(boards[x][y]!=null && boards[x][y].piece == uPiece){
-					return boards[x][y];
+				if(mCurrentBoard[x][y]!=null && mCurrentBoard[x][y].piece == uPiece){
+					return mCurrentBoard[x][y];
 				}
 			}
 		}
@@ -177,7 +167,7 @@ public class UserBoard {
 	 * @return 指定された座標のUserSpot(マス目)
 	 */
 	public UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
-		return boards[userCordinate.x][userCordinate.y];
+		return mCurrentBoard[userCordinate.x][userCordinate.y];
 	}
 
 	/**
@@ -188,8 +178,8 @@ public class UserBoard {
 	private UserSpot getUserSpotFromBaseSpot(Spot baseSpot){
 		for(int x=0; x<USER_SPOT_NUM; x++){
 			for(int y=0; y<USER_SPOT_NUM; y++){
-				if(boards[x][y]!=null && boards[x][y].baseSpot.mCordinate.equals(baseSpot.mCordinate)){
-					return boards[x][y];
+				if(mCurrentBoard[x][y]!=null && mCurrentBoard[x][y].baseSpot.mCordinate.equals(baseSpot.mCordinate)){
+					return mCurrentBoard[x][y];
 				}
 			}
 		}
@@ -203,11 +193,11 @@ public class UserBoard {
 	 * @param distance 隣接したマス目を取得したい場合は1, 1つ離れたマス目を取得したい場合は2
 	 * @return 指定されたマス目の周囲8方向({@link Direction})のマス目.端の方向はnullを返却する
 	 */
-	public EnumMap<Direction, UserSpot> getAroundUserSpots(UserSpot spot, int distance){
+	private EnumMap<Direction, UserSpot> getAroundUserSpots(UserSpot spot, int distance){
 		EnumMap<Direction, UserSpot> ret = new EnumMap<>(Direction.class);
 
 		// cloneBoardにbaseSpotを指定して周囲8方向のSpotを取得
-		EnumMap<Direction,Spot> aroundSpot = cloneBoard.getAroundSpot(spot.baseSpot, distance);
+		EnumMap<Direction,Spot> aroundSpot = mCurrentCloneBoard.getAroundSpot(spot.baseSpot, distance);
 		// 各方向を操作
 		for(Direction d : Direction.values()){
 			Spot currentSpot = aroundSpot.get(d);
@@ -216,7 +206,7 @@ public class UserBoard {
 				continue;
 			}
 			// 方角をUserSpot用に変換
-			Direction userDirection = d.getRelativeDirection(mainTeam);
+			Direction userDirection = d.getRelativeDirection(mCurrentTeam);
 			// currentSpotに該当するSpotを検索
 			UserSpot userSpot = getUserSpotFromBaseSpot(currentSpot);
 			// これも見つからない可能性があるのでなければスキップ
@@ -246,12 +236,32 @@ public class UserBoard {
 	}
 
 	/**
+	 * 指定されたチームの移動可能なPiece一覧を返却する
+	 * @param teamColor
+	 * @return
+	 */
+	public Set<UserPiece> getMovableUserPieces(TeamColor teamColor){
+		Set<UserPiece> pieces = getPiecesFromTeam(teamColor);
+		Set<UserPiece> result = new HashSet<>();
+		for(UserPiece up : pieces){
+			UserSpot userSpot = getUserSpotFromPiece(up);
+			if(userSpot == null){
+				continue;
+			}
+			if(getMovableSpots(userSpot).size() > 0){
+				result.add(up);
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * 指定されたチームのUserPiece(駒)をすべて返却します
 	 * @param team 返却したいチーム
 	 * @return 指定されたチームのUserPiece(駒)すべて({@link Set}型)
 	 */
 	public Set<UserPiece> getPiecesFromTeam(TeamColor team){
-		return new HashSet<>(pieces.get(team));
+		return new HashSet<>(mPieceTable.get(team));
 	}
 
 	/**
@@ -283,7 +293,7 @@ public class UserBoard {
 		assert currentSpot.baseSpot != null && nextSpot.baseSpot != null;
 
 		// Board的に移動できるか確認する
-		boolean result = cloneBoard.isAvailableMove(currentSpot.baseSpot, nextSpot.baseSpot);
+		boolean result = mCurrentCloneBoard.isAvailableMove(currentSpot.baseSpot, nextSpot.baseSpot);
 
 		return result;
 	}
@@ -315,25 +325,45 @@ public class UserBoard {
 		mLog.fine("exactSpot start team:%s spot:%s cordinate:%s", team, spot, uCordinate);
 
 		// すでに展開済みのSpotなら何もしない
-		if(boards[uCordinate.x][uCordinate.y] != null){
+		if(mCurrentBoard[uCordinate.x][uCordinate.y] != null){
 			return;
 		}
 
-		// 引数に該当するUserSpotをnewする
-		UserSpot targetSpot = boards[uCordinate.x][uCordinate.y] = new UserSpot(spot, uCordinate);
-		mLog.fine("exactSpot create userSpot:%s ", targetSpot);
+		// 引数に該当するUserSpotをTableから検索する. なければnewして登録
+		UserSpot targetSpot = null;
+		targetSpot = mUserSpotTable.get(spot.mCordinate);
+		if(targetSpot == null){
+			targetSpot = new UserSpot(spot, uCordinate);
+			mUserSpotTable.put(spot.mCordinate, targetSpot);
+			mLog.fine("exactSpot create userSpot:%s ", targetSpot);
+		}
+
+		// mCurrentBoardに登録する
+		mCurrentBoard[uCordinate.x][uCordinate.y] = targetSpot;
+		mLog.fine("exactSpot regist userSpot:%s ", targetSpot);
 
 		// SpotにPieceが存在すればUserSpotにUserPieceとして配置する
 		if(spot.mPiece != null){
-			UserPiece uPiece = new UserPiece(spot.mPiece);
-			targetSpot.setPiece(uPiece);
-			pieces.get(spot.mPiece.getmTeamColor()).add(uPiece);
-			mLog.fine("put userPiece :%s -> Spot:%s ", uPiece, targetSpot);
+			// UserPieceが生成済みか確認。なければnewする
+			UserPiece targetPiece = null;
+			for(UserPiece up : mPieceTable.get(spot.mPiece.getmTeamColor())){
+				if(up.basePiece == spot.mPiece){
+					targetPiece = up;
+					break;
+				}
+			}
+			if(targetPiece == null){
+				targetPiece = new UserPiece(spot.mPiece);
+				mPieceTable.get(spot.mPiece.getmTeamColor()).add(targetPiece);
+				mLog.fine("exactSpot create userPiece:%s ", targetPiece);
+			}
+			targetSpot.setPiece(targetPiece);
+			mLog.fine("put userPiece :%s -> Spot:%s ", targetPiece, targetSpot);
 		}
 
 		// 右前側のSpot チーム視点の欲しい方角(右前)を基準方角し、次のSpotを取得する
 		Direction convedDirectionRightF = Direction.RIGHT_FRONT.getRelativeDirection(team);
-		Spot rightFront = cloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionRightF));
+		Spot rightFront = mCurrentCloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionRightF));
 		mLog.fine("exact rightFront(%s) -> Spot:%s ", convedDirectionRightF, rightFront);
 		if(rightFront != null){
 			exactSpot(team, rightFront, uCordinate.getMovedCordinate(1, Direction.RIGHT_FRONT));
@@ -341,12 +371,81 @@ public class UserBoard {
 
 		// 左前側のSpot チーム視点の欲しい方角(左前)を基準方角に変換し、次のSpotを取得する
 		Direction convedDirectionLeftF = Direction.LEFT_FRONT. getRelativeDirection(team);
-		Spot leftFront = cloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionLeftF));
+		Spot leftFront = mCurrentCloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionLeftF));
 		mLog.fine("exact leftFront(%s) -> Spot:%s ", convedDirectionLeftF, leftFront);
 		if(leftFront != null){
 			exactSpot(team, leftFront, uCordinate.getMovedCordinate(1, Direction.LEFT_FRONT));
 		}
 
+	}
+
+	/**
+	 * {@link UserBoard#mCurrentBoard}の初期化
+	 */
+	private void clearBoards(){
+		assert mCurrentBoard != null;
+		for(int x = 0; x < USER_SPOT_NUM; x++){
+			for(int y = 0; y < USER_SPOT_NUM; y++){
+				mCurrentBoard[x][y] = null;
+			}
+		}
+		return;
+	}
+
+	/**
+	 * {@link UserBoard#mCurrentCloneBoard}の状態を{@link UserBoard#mCurrentBoard}に反映させる
+	 */
+	private void syncBoards() {
+		/* 各チームのベース地点を0,0として、UserSpotにSpotを登録してく
+		   SpotにPieceが配置されていれば、UserSpotに変換してUserSpotに登録する */
+
+		// チームごとのルートとなるSpotを取得
+		Spot rootSpot = mCurrentCloneBoard.getSpotFromCordinate(mCurrentTeam.getRootCordinate());
+
+		// ルートから、すべてのSpotの右前、左上と展開していく
+		exactSpot(mCurrentTeam, rootSpot, new UserCordinate(0, 0));
+	}
+
+	/**
+	 * {@link UserBoard#mUserSpotTable}に登録されているUserPieceを一旦登録解除します
+	 */
+	private void clearSpotTablePiece(){
+		for(UserSpot us : mUserSpotTable.values()){
+			us.piece = null;
+		}
+	}
+
+	/**
+	 * [コンソール出力用] 現在のUserPiece(駒)の状態をコンソールに出力します
+	 */
+	public void logConsoleUserBoardImage() {
+		for(String s: logGetBoadString()){
+			mLog.info(s);
+		}
+	}
+
+	/**
+	 * [コンソール出力用] 現在のUserPiece(駒)の状態をコンソール用に生成します
+	 * @return
+	 */
+	public List<String> logGetBoadString(){
+		List<String> result = new ArrayList<>();
+		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲"));
+		result.add(String.format("A                   %s                  ", s2cs(6,6)));
+		result.add(String.format("B                 %s  %s                ", s2cs(6,5), s2cs(5,6)));
+		result.add(String.format("C               %s  %s  %s              ", s2cs(6,4), s2cs(5,5), s2cs(4,6)));
+		result.add(String.format("D %s  %s  %s  %s  %s  %s  %s  %s  %s  %s", s2cs(9,0), s2cs(8,1), s2cs(7,2), s2cs(6,3), s2cs(5,4), s2cs(4,5), s2cs(3,6), s2cs(2,7), s2cs(1,8), s2cs(0,9)));
+		result.add(String.format("E   %s  %s  %s  %s  %s  %s  %s  %s  %s  ", s2cs(8,0), s2cs(7,1), s2cs(6,2), s2cs(5,3), s2cs(4,4), s2cs(3,5), s2cs(2,6), s2cs(1,7), s2cs(0,8)));
+		result.add(String.format("F     %s  %s  %s  %s  %s  %s  %s  %s    ", s2cs(7,0), s2cs(6,1), s2cs(5,2), s2cs(4,3), s2cs(3,4), s2cs(2,5), s2cs(1,6), s2cs(0,7)));
+		result.add(String.format("G       %s  %s  %s  %s  %s  %s  %s      ", s2cs(6,0), s2cs(5,1), s2cs(4,2), s2cs(3,3), s2cs(2,4), s2cs(1,5), s2cs(0,6)));
+		result.add(String.format("H         %s  %s  %s  %s  %s  %s        ", s2cs(5,0), s2cs(4,1), s2cs(3,2), s2cs(2,3), s2cs(1,4), s2cs(0,5)));
+		result.add(String.format("I           %s  %s  %s  %s  %s          ", s2cs(4,0), s2cs(3,1), s2cs(2,2), s2cs(1,3), s2cs(0,4)));
+		result.add(String.format("J             %s  %s  %s  %s            ", s2cs(3,0), s2cs(2,1), s2cs(1,2), s2cs(0,3)));
+		result.add(String.format("K               %s  %s  %s              ", s2cs(2,0), s2cs(1,1), s2cs(0,2)));
+		result.add(String.format("L                 %s  %s                ", s2cs(1,0), s2cs(0,1)));
+		result.add(String.format("M                   %s                  ", s2cs(0,0)));
+		result.add(String.format("  ①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲"));
+		return result;
 	}
 
 	/**
