@@ -424,6 +424,26 @@ public class UserBoard {
 	}
 
 	/**
+	 * 現在のUserBoardの状態を保存します
+	 * @return 保存したUserBoardの状態
+	 */
+	public UserBoardImage getUserBoardImage(){
+		return new UserBoardImage(mCurrentCloneBoard);
+	}
+
+	/**
+	 * UserBoardImageを使用してUserBoardの状態を以前の状態に復帰させます
+	 * @param image
+	 */
+	public void applyUserBoardImage(UserBoardImage image){
+		this.mCurrentCloneBoard = image.getmCloneBoard().cloneBoard();
+
+		this.clearBoards();
+		this.clearSpotTablePiece();
+		this.syncBoards();
+	}
+
+	/**
 	 * 指定されたチームのPointを返却します
 	 * @param teamColor
 	 * @return
@@ -795,4 +815,13 @@ public class UserBoard {
 		}
 	}
 
+	public static class UserBoardImage {
+		Board mCloneBoard;
+		public UserBoardImage(Board board){
+			mCloneBoard = board.cloneBoard();
+		}
+		Board getmCloneBoard() {
+			return mCloneBoard;
+		}
+	}
 }
