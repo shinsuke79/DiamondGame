@@ -9,8 +9,8 @@ import common.DGLog;
 import common.TeamColor;
 import game.Move;
 import game.UserBoard;
+import game.UserBoard.UserCordinate;
 import game.UserBoard.UserPiece;
-import game.UserBoard.UserSpot;
 import user.User;
 import user.UserInfo;
 
@@ -53,8 +53,8 @@ public class ObakaUser extends User {
 		moveResult.mPiece = userPiece;
 
 		// 動かすと心に決めたUserPieceのUserSpotを取得する
-		UserSpot firstSpot   = userBoard.getUserSpotFromPiece(userPiece);
-		UserSpot currentSpot = firstSpot;
+		UserCordinate firstCordinate   = userBoard.getUserCordinateFromPiece(userPiece);
+		UserCordinate currentCordinate = firstCordinate;
 		boolean  isFirst     = true;
 		int      count       = 0;
 
@@ -65,44 +65,43 @@ public class ObakaUser extends User {
 				break;
 			}
 
-			mLog.info("おばか%s「%s は」", getName(), currentSpot);
+			mLog.info("おばか%s「%s は」", getName(), currentCordinate);
 
 			// 取得できるSpot一覧を取得
-			List<UserSpot> movableSpots = new ArrayList<>(userBoard.getMovableSpots(currentSpot, isFirst));
-			mLog.info("おばか%s「ここに移動できるのか %s」", getName(), movableSpots.stream().map((spot)->spot.getCordinate())
-													.collect(Collectors.toList()));
+			List<UserCordinate> movableCordinates = new ArrayList<>(userBoard.getMovableCordinates(currentCordinate, isFirst));
+			mLog.info("おばか%s「ここに移動できるのか %s」", getName(), movableCordinates);
 
 			// エラーチェック
-			if(isFirst && movableSpots.size()==0){
+			if(isFirst && movableCordinates.size()==0){
 				assert false;
 			}
 
 			// もう移動できないなら終了
-			if(movableSpots.size()==0){
+			if(movableCordinates.size()==0){
 				mLog.info("おばか%s「ってどこにも行けないやん…」", getName());
 				break;
 			}
 
 			// もう動かすマスを決めちゃう
-			UserSpot nextUserSpot = movableSpots.get(rnd.nextInt(movableSpots.size()));
-			mLog.info("おばか%s「これにする！ %s」", getName(), nextUserSpot);
+			UserCordinate nextUserCordinate = movableCordinates.get(rnd.nextInt(movableCordinates.size()));
+			mLog.info("おばか%s「これにする！ %s」", getName(), nextUserCordinate);
 
 			// 移動元に戻っちゃうようならその場で打ち切り
-			if(firstSpot==nextUserSpot || moveResult.mMoveSpots.contains(nextUserSpot)){
+			if(firstCordinate.equals(nextUserCordinate) || moveResult.mMoveSpots.contains(nextUserCordinate)){
 				mLog.info("おばか%s「ここ移動したとこだわ…」", getName());
 				break;
 			}
 
 			// 移動を登録
-			moveResult.mMoveSpots.add(nextUserSpot);
+			moveResult.mMoveSpots.add(userBoard.getCordinateFromUserCordinate(nextUserCordinate));
 
 			// 隣接するSpotへの移動なら即終了
-			if(userBoard.isAdjacentSpot(currentSpot, nextUserSpot)){
+			if(userBoard.isAdjacentCordinate(currentCordinate, nextUserCordinate)){
 				break;
 			}
 
 			// nextをcurrentに設定
-			currentSpot = nextUserSpot;
+			currentCordinate = nextUserCordinate;
 
 			// 初めてフラグを落とす
 			isFirst = false;

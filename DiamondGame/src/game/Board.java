@@ -253,7 +253,7 @@ public class Board implements Cloneable {
 
 		// 座標を更新する
 		Piece piece = move.mPiece.getBasePiece();
-		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m.getBaseCordinate())).collect(Collectors.toList());
+		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m)).collect(Collectors.toList());
 		Spot currentSpot = getSpotFromPiece(piece);
 		Spot nextSpot    = spots.get(0);
 		while(!spots.isEmpty()){
@@ -324,7 +324,7 @@ public class Board implements Cloneable {
 
 		// User型のPiece/Spotを共通型へ変換
 		Piece piece = move.mPiece.getBasePiece();
-		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m.getBaseCordinate())).collect(Collectors.toList());
+		List<Spot> spots = move.mMoveSpots.stream().map((m)->getSpotFromCordinate(m)).collect(Collectors.toList());
 
 		// 動かす駒がTeamColorに一致していることの確認
 		if(piece.getmTeamColor() != move.getmTeam()){

@@ -5,7 +5,6 @@ import common.TeamColor;
 import game.Move;
 import game.UserBoard;
 import game.UserBoard.UserCordinate;
-import game.UserBoard.UserSpot;
 import user.User;
 import user.UserInfo;
 import view.UserInterface;
@@ -48,9 +47,8 @@ public class HumanUser extends User {
 		// To
 		for(UIBoardSpot uiTo : uiHand.to){
 			UserCordinate uCordinateTo = UIBoardSpot.spotConvTable.getUserCordinateFromUiCordinate(uiTo.getLine(), uiTo.getColumn());
-			UserSpot uSpotTo = userBoard.getUserSpotFromCordinate(uCordinateTo);
-			assert uSpotTo != null;
-			moveResult.mMoveSpots.add(uSpotTo);
+			assert uCordinateTo != null;
+			moveResult.mMoveSpots.add(userBoard.getCordinateFromUserCordinate(uCordinateTo));
 		}
 
 		mLog.info("think end result:%s", moveResult);
