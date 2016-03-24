@@ -544,7 +544,7 @@ public class UserBoard {
 	 * @author 0000140105
 	 *
 	 */
-	public class UserSpot {
+	class UserSpot {
 		private Spot baseSpot;
 		private UserPiece piece;
 		private UserCordinate cordinate;
