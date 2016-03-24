@@ -1,6 +1,7 @@
 package user.yone.hillClimbingUser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,8 +80,12 @@ public class HillClimbingUser extends User {
 		// nodeListをソート(hnが大きい順)
 		nodeList.sort((n1, n2)-> (n1.hn-n2.hn)*-1 );
 
-		say("頂上に到着!! h(n):%d List:%s", nodeList.get(0).hn, nodeList.get(0).moveList);
-		Move result = nodeList.get(0).moveList.get(0);
+		int maxSize = nodeList.get(0).hn;
+		List<Node> maxNodes = nodeList.stream().filter((n)->n.hn == maxSize).collect(Collectors.toList());
+		Collections.shuffle(maxNodes);
+
+		say("頂上に到着!! h(n):%d List:%s", maxNodes.get(0).hn, maxNodes.get(0).moveList);
+		Move result = maxNodes.get(0).moveList.get(0);
 		moveResult.mPiece = result.mPiece;
 		moveResult.mMoveSpots.add(result.mMoveSpots.get(0));
 
