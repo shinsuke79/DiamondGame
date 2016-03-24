@@ -20,7 +20,7 @@ import game.GameConfig;
 import game.GameManager;
 import game.GameMaster;
 import game.UserBoard;
-import game.UserBoard.UserSpot;
+import game.UserBoard.UserCordinate;
 import user.User;
 import user.UserInfo;
 import user.UserManager;
@@ -287,12 +287,12 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		System.out.println("移動元のマスを選択してください");
 
 		// 移動できる座標の候補一覧を取得
-		List<UserSpot> fromUserSpots =  userBoard.getPiecesFromTeam(humanUser.getMyTeam()).stream()
-										.map((up)->userBoard.getUserSpotFromPiece(up))
-										.filter((uSpot) -> userBoard.getMovableSpots(uSpot).size() > 0)
+		List<UserCordinate> fromUserCordinates =  userBoard.getPiecesFromTeam(humanUser.getMyTeam()).stream()
+										.map((up)->userBoard.getUserCordinateFromPiece(up))
+										.filter((uCordinate) -> userBoard.getMovableCordinates(uCordinate).size() > 0)
 										.collect(Collectors.toList());
-		List<UIBoardSpot> fromUISpots = fromUserSpots.stream()
-										.map((u)->UIBoardSpot.parseUserCordinate(u.getCordinate()))
+		List<UIBoardSpot> fromUISpots = fromUserCordinates.stream()
+										.map((uCordinate)->UIBoardSpot.parseUserCordinate(uCordinate))
 										.collect(Collectors.toList());
 
 		UIBoardSpot fromUiSpot = null;
@@ -327,10 +327,10 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 			System.out.printf("現在: %s \n", currentToSpot.getValueStr());
 
 			// 現在のSpotから移動可能なSpot(全方位1と2)を取得する
-			UserSpot currentToUserSpot = userBoard.getUserSpotFromCordinate(currentToSpot.toUserCordinate());
-			Set<UserSpot> toMovableSpots = userBoard.getMovableSpots(currentToUserSpot);
-			List<UIBoardSpot> toMovableUISpots = toMovableSpots.stream()
-											.map((u)->UIBoardSpot.parseUserCordinate(u.getCordinate()))
+			UserCordinate currentToUserCordinate = currentToSpot.toUserCordinate();
+			Set<UserCordinate> toMovableCordinate = userBoard.getMovableCordinates(currentToUserCordinate);
+			List<UIBoardSpot> toMovableUISpots = toMovableCordinate.stream()
+											.map((uCordinate)->UIBoardSpot.parseUserCordinate(uCordinate))
 											.collect(Collectors.toList());
 
 			// 表示

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import common.DGLog;
 import common.Direction;
@@ -159,11 +160,25 @@ public class UserBoard {
 	}
 
 	/**
+	 * 指定されたUserPiece(駒)が配置されているUserCordinate(座標)を返却します
+	 * @param uPiece 検索に使用する駒
+	 * @return uPieceが配置されているUserCordinate(座標)
+	 */
+	public UserCordinate getUserCordinateFromPiece(UserPiece uPiece) {
+		UserSpot userSpot = getUserSpotFromPiece(uPiece);
+		if(userSpot != null){
+			return userSpot.cordinate;
+		}else{
+			return null;
+		}
+	}
+
+	/**
 	 * 指定されたUserPiece(駒)が配置されているUserSpot(マス目)を返却します
 	 * @param uPiece 検索に使用する駒
 	 * @return uPieceが配置されているUserSpot(マス目)
 	 */
-	public UserSpot getUserSpotFromPiece(UserPiece uPiece){
+	UserSpot getUserSpotFromPiece(UserPiece uPiece){
 		for(int x=0; x<USER_SPOT_NUM; x++){
 			for(int y=0; y<USER_SPOT_NUM; y++){
 				if(mCurrentBoard[x][y]!=null && mCurrentBoard[x][y].piece == uPiece){
@@ -179,7 +194,7 @@ public class UserBoard {
 	 * @param userCordinate 検索に使用するマス目の座標
 	 * @return 指定された座標のUserSpot(マス目)
 	 */
-	public UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
+	UserSpot getUserSpotFromCordinate(UserCordinate userCordinate) {
 		return mCurrentBoard[userCordinate.x][userCordinate.y];
 	}
 
@@ -237,7 +252,7 @@ public class UserBoard {
 	 * @param spot チーム問わず、移動可能なマス目を知りたいマス目
 	 * @return 移動可能なマス目の一覧.どこにも移動できなければ要素0の集合が返却される
 	 */
-	public Set<UserSpot> getMovableSpots(UserSpot spot){
+	Set<UserSpot> getMovableSpots(UserSpot spot){
 		return getMovableSpots(spot, true);
 	}
 
@@ -247,7 +262,7 @@ public class UserBoard {
 	 * @param isFirst spotがすでに一回移動した場合のケースならfalseを設定(移動範囲1が除外される)
 	 * @return 移動可能なマス目の一覧.どこにも移動できなければ要素0の集合が返却される
 	 */
-	public Set<UserSpot> getMovableSpots(UserSpot spot, boolean isFirst){
+	Set<UserSpot> getMovableSpots(UserSpot spot, boolean isFirst){
 		Set<UserSpot> result = new HashSet<>();
 		// 最初は移動範囲１も含める
 		if(isFirst){
@@ -260,6 +275,27 @@ public class UserBoard {
 							.filter((us)->isAvailableMove(spot, us))
 							.forEach((us)->result.add(us));
 		return result;
+	}
+
+	/**
+	 * 指定されたUserCordinate(座標)が移動できるUserCordinate(座標)一覧を返却します
+	 * @param uCordinate チーム問わず、移動可能な座標を知りたい座標
+	 * @return 移動可能な座標の一覧.どこにも移動できなければ要素0の集合が返却される
+	 */
+	public Set<UserCordinate> getMovableCordinates(UserCordinate uCordinate) {
+		return getMovableCordinates(uCordinate, true);
+	}
+
+	/**
+	 * 指定されたUserCordinate(座標)が移動できるUserCordinate(座標)一覧を返却します
+	 * @param uCordinate チーム問わず、移動可能な座標を知りたい座標
+	 * @param isFirst spotがすでに一回移動した場合のケースならfalseを設定(移動範囲1が除外される)
+	 * @return 移動可能な座標の一覧.どこにも移動できなければ要素0の集合が返却される
+	 */
+	public Set<UserCordinate> getMovableCordinates(UserCordinate uCordinate, boolean isFirst) {
+		UserSpot userSpot = getUserSpotFromCordinate(uCordinate);
+		Set<UserSpot> movableSpots = getMovableSpots(userSpot, isFirst);
+		return movableSpots.stream().map((uSpot)->uSpot.cordinate).collect(Collectors.toSet());
 	}
 
 	/**
@@ -310,7 +346,7 @@ public class UserBoard {
 	 * @param nextSpot 移動先のマス目. 実際に配置されている駒も考慮して移動可能かチェックされる
 	 * @return 移動可能ならtrue, 不可能ならfalse
 	 */
-	public boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
+	boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
 		// nullは許容する
 		if(currentSpot == null || nextSpot == null){
 			return false;
@@ -332,13 +368,35 @@ public class UserBoard {
 	 * @return uSpot1とuSpot2が隣接していればTrue
 	 * uSpot1とuSpot2は必ず同じUserBoardに所属しているUserSpotを指定すること
 	 */
-	public boolean isAdjacentSpot(UserSpot uSpot1, UserSpot uSpot2){
+	boolean isAdjacentSpot(UserSpot uSpot1, UserSpot uSpot2){
 		for(Entry<Direction, UserSpot> entry : getAroundUserSpots(uSpot1, 1).entrySet()){
 			if(entry.getValue() != null && entry.getValue() == uSpot2){
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * uCordinate1とuCordinate2が隣接していればTrueを返します
+	 * @param uCordinate1 UserBoardに所属する座標
+	 * @param uCordinate2 UserBoardに所属する座標
+	 * @return uCordinate1とuCordinate2が隣接していればTrue
+	 */
+	public boolean isAdjacentCordinate(UserCordinate uCordinate1, UserCordinate uCordinate2) {
+		UserSpot userSpot1 = getUserSpotFromCordinate(uCordinate1);
+		UserSpot userSpot2 = getUserSpotFromCordinate(uCordinate2);
+		return isAdjacentSpot(userSpot1, userSpot2);
+	}
+
+	/**
+	 * UserCordinateの座標をCordinateの座標に変換します
+	 * @param uCordinate
+	 * @return
+	 */
+	public Cordinate getCordinateFromUserCordinate(UserCordinate uCordinate) {
+		UserSpot userSpot = getUserSpotFromCordinate(uCordinate);
+		return userSpot.getBaseCordinate();
 	}
 
 	/**
@@ -712,4 +770,5 @@ public class UserBoard {
 			}
 		}
 	}
+
 }

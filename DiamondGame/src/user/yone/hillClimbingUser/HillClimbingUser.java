@@ -13,13 +13,12 @@ import game.Move;
 import game.UserBoard;
 import game.UserBoard.UserCordinate;
 import game.UserBoard.UserPiece;
-import game.UserBoard.UserSpot;
 import user.User;
 import user.UserInfo;
 
 /**
  * 山登り法(hill climbing)を使用したユーザー<br>
- * 現状取りうる手の中で、一番UserSpotのポイント(評価関数)が<br>
+ * 現状取りうる手の中で、一番UserCordinateのポイント(評価関数)が<br>
  * 高かった手を選択する
  * @author 0000140105
  *
@@ -48,20 +47,20 @@ public class HillClimbingUser extends User {
 		say("探索するPieceは%dつ[%s]",movableUserPieces.size(), movableUserPieces.stream()
 											.map((pi)->pi.getNameStr()).collect(Collectors.toList()));
 
-		// 移動できる駒が移動できるSpotsを探し、そこからMoveを洗い出す
+		// 移動できる駒が移動できるCordinatesを探し、そこからMoveを洗い出す
 		for(UserPiece uPiece : movableUserPieces){
 			say("移動元の駒が%sの場合の探索",uPiece.getNameStr());
 			// 移動元PieceのSpot取得
-			UserSpot userSpot = userBoard.getUserSpotFromPiece(uPiece);
-			assert userSpot != null;
+			UserCordinate userCordinate = userBoard.getUserCordinateFromPiece(uPiece);
+			assert userCordinate != null;
 			// 移動先候補を取得
-			Set<UserSpot> movableSpots = userBoard.getMovableSpots(userSpot);
-			say("移動先の候補は%dつ。", movableSpots.size());
-			for(UserSpot nextSpot : movableSpots){
-				say("移動先の%sから作られるMoveを洗い出す", nextSpot.getCordinate());
+			Set<UserCordinate> movableCordinates = userBoard.getMovableCordinates(userCordinate);
+			say("移動先の候補は%dつ。", movableCordinates.size());
+			for(UserCordinate nextCordinate : movableCordinates){
+				say("移動先の%sから作られるMoveを洗い出す", nextCordinate);
 				// 移動先候補から作成されうるMove一覧を取得
-				List<Move> moveList =  createMoves(userBoard, uPiece, userSpot, nextSpot);
-				say("移動の%s->%sから作られたMoveは%dつ。", userSpot.getCordinate(), nextSpot.getCordinate(), moveList.size());
+				List<Move> moveList =  createMoves(userBoard, uPiece, userCordinate, nextCordinate);
+				say("移動の%s->%sから作られたMoveは%dつ。", userCordinate, nextCordinate, moveList.size());
 				// 各MoveをNodeにしてNodeListに追加(その時hnも更新)
 				for(Move move : moveList){
 					Node node = new Node();
@@ -99,20 +98,20 @@ public class HillClimbingUser extends User {
 	 * @param to
 	 * @return
 	 */
-	private List<Move> createMoves(UserBoard userBoard, UserPiece uPiece, UserSpot from, UserSpot to) {
+	private List<Move> createMoves(UserBoard userBoard, UserPiece uPiece, UserCordinate from, UserCordinate to) {
 		List<Move> result = new ArrayList<>();
 		Set<UserCordinate> footPrints = new HashSet<>();
 
 		// 一つ目を作成&登録
 		Move move = new Move(this);
 		move.mPiece = uPiece;
-		move.mMoveSpots.add(to);
+		move.mMoveSpots.add(userBoard.getCordinateFromUserCordinate(to));
 		result.add(move);
-		footPrints.add(from.getCordinate());
-		footPrints.add(to.getCordinate());
+		footPrints.add(from);
+		footPrints.add(to);
 
 		// 1マス移動ならこれでおしまい
-		if(userBoard.isAdjacentSpot(from, to)){
+		if(userBoard.isAdjacentCordinate(from, to)){
 			return result;
 		}
 
@@ -122,26 +121,26 @@ public class HillClimbingUser extends User {
 		return result;
 	}
 
-	private void exact(UserBoard userBoard, Set<UserCordinate> footPrints, List<Move> result, Move baseMove, UserSpot spot){
+	private void exact(UserBoard userBoard, Set<UserCordinate> footPrints, List<Move> result, Move baseMove, UserCordinate cordinate){
 		// 移動先一覧を取得
-		Set<UserSpot> movableSpots = userBoard.getMovableSpots(spot, false);
+		Set<UserCordinate> movableCordinates = userBoard.getMovableCordinates(cordinate, false);
 
 		// 移動先が見つからないなら終了
-		if(movableSpots.size() == 0){
+		if(movableCordinates.size() == 0){
 			return;
 		}
 
 		// 移動先があればResultに追加しつつそれぞれを再帰的に展開
-		for(UserSpot nextSpot : movableSpots){
+		for(UserCordinate nextCordinate : movableCordinates){
 			// すでに足あとが付いているSpotならスキップ
-			if(footPrints.contains(nextSpot.getCordinate())){
+			if(footPrints.contains(nextCordinate)){
 				continue;
 			}
 			Move move = baseMove.cloneMove();
-			move.mMoveSpots.add(nextSpot);
+			move.mMoveSpots.add(userBoard.getCordinateFromUserCordinate(nextCordinate));
 			result.add(move);
-			footPrints.add(nextSpot.getCordinate());
-			exact(userBoard, footPrints, result, move, nextSpot);
+			footPrints.add(nextCordinate);
+			exact(userBoard, footPrints, result, move, nextCordinate);
 		}
 	}
 

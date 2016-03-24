@@ -2,11 +2,10 @@ package game;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import common.TeamColor;
+import game.Board.Cordinate;
 import game.UserBoard.UserPiece;
-import game.UserBoard.UserSpot;
 import user.User;
 
 public class Move {
@@ -21,7 +20,7 @@ public class Move {
 	/**
 	 * どう進めるか(配列)
 	 */
-	public List<UserSpot> mMoveSpots;
+	public List<Cordinate> mMoveSpots;
 
 	public User getmUser() {
 		return mUser;
@@ -49,6 +48,6 @@ public class Move {
 	public String toString() {
 		return "Move [mTeam=" + mTeam.getName()
 			+ ", mPiece=" + mPiece != null ? mPiece.getNameStr():"null"
-			+ ", mMoveSpots=" + mMoveSpots.stream().map((uSpot)->uSpot.getCordinate()).collect(Collectors.toList()) + "]";
+			+ ", mMoveSpots=" + mMoveSpots + "]";
 	}
 }
