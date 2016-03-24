@@ -346,6 +346,30 @@ public class UserBoard {
 	 * @param nextSpot 移動先のマス目. 実際に配置されている駒も考慮して移動可能かチェックされる
 	 * @return 移動可能ならtrue, 不可能ならfalse
 	 */
+	public boolean isAvailableMove(UserCordinate currentCordinate, UserCordinate nextCordinate){
+		// nullは許容する
+		if(currentCordinate == null || nextCordinate == null){
+			return false;
+		}
+
+		UserSpot fromUserSpot = getUserSpotFromCordinate(currentCordinate);
+		UserSpot nextUserSpot = getUserSpotFromCordinate(nextCordinate);
+
+		// UserSpotにSpotが登録されていないことは保証しない
+		assert fromUserSpot.baseSpot != null && nextUserSpot.baseSpot != null;
+
+		// Board的に移動できるか確認する
+		boolean result = mCurrentCloneBoard.isAvailableMove(fromUserSpot.baseSpot, nextUserSpot.baseSpot);
+
+		return result;
+	}
+
+	/**
+	 * 指定されたUserSpot(マス目)が指定されたマス目に移動可能か返却します
+	 * @param currentSpot 移動元のマス目. 実際に移動元のUserSpotに駒が配置されている必要はない
+	 * @param nextSpot 移動先のマス目. 実際に配置されている駒も考慮して移動可能かチェックされる
+	 * @return 移動可能ならtrue, 不可能ならfalse
+	 */
 	boolean isAvailableMove(UserSpot currentSpot, UserSpot nextSpot){
 		// nullは許容する
 		if(currentSpot == null || nextSpot == null){
