@@ -768,7 +768,7 @@ public class UserBoard {
 				dy = 0;
 				break;
 			}
-			UserCordinate result = new UserCordinate(this.getX()+dx, this.getY()+dy);
+			UserCordinate result = new UserCordinate(this.x+dx, this.y+dy);
 			Log.fine("getMovedUserCordinate result:%s ", result);
 			return result;
 		}
