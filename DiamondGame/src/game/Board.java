@@ -486,12 +486,13 @@ public class Board implements Cloneable {
 
 		EnumMap<Direction, Spot> result = new EnumMap<>(Direction.class);
 		for(Direction d: Direction.values()){
-			result.put(d, getNextSpotUsingDirection(spot, d, distance));
+			Spot nextSpot = getNextSpotUsingDirection(spot, d, distance);
+			result.put(d, nextSpot);
+			if(nextSpot != null){
+				mLog.fine("getAroundSpot %s:\t%s ", d, nextSpot.mCordinate);
+			}
 		}
 
-		for(Entry<Direction, Spot> e: result.entrySet()){
-			mLog.fine("getAroundSpot %s:\t%s ", e.getKey(), e.getValue());
-		}
 		return result;
 	}
 
