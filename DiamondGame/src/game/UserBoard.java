@@ -459,7 +459,7 @@ public class UserBoard {
 	 * @param spot
 	 * @param uCordinate
 	 */
-	private void exactSpot(TeamColor team, Spot spot, UserCordinate uCordinate){
+	private void exactSpot(TeamColor team, Spot spot, UserCordinate uCordinate, Map<Piece, UserPiece> pieceTable){
 		mLog.fine("exactSpot start team:%s spot:%s cordinate:%s", team, spot, uCordinate);
 
 		// すでに展開済みのSpotなら何もしない
@@ -483,16 +483,11 @@ public class UserBoard {
 		// SpotにPieceが存在すればUserSpotにUserPieceとして配置する
 		if(spot.mPiece != null){
 			// UserPieceが生成済みか確認。なければnewする
-			UserPiece targetPiece = null;
-			for(UserPiece up : mPieceTable.get(spot.mPiece.getmTeamColor())){
-				if(up.basePiece == spot.mPiece){
-					targetPiece = up;
-					break;
-				}
-			}
+			UserPiece targetPiece = pieceTable.get(spot.mPiece);
 			if(targetPiece == null){
 				targetPiece = new UserPiece(spot.mPiece);
 				mPieceTable.get(spot.mPiece.getmTeamColor()).add(targetPiece);
+				pieceTable.put(spot.mPiece, targetPiece);
 				mLog.fine("exactSpot create userPiece:%s ", targetPiece);
 			}
 			targetSpot.setPiece(targetPiece);
@@ -504,7 +499,7 @@ public class UserBoard {
 		Spot rightFront = mCurrentCloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionRightF));
 		mLog.fine("exact rightFront(%s) -> Spot:%s ", convedDirectionRightF, rightFront);
 		if(rightFront != null){
-			exactSpot(team, rightFront, uCordinate.getMovedCordinate(1, Direction.RIGHT_FRONT));
+			exactSpot(team, rightFront, uCordinate.getMovedCordinate(1, Direction.RIGHT_FRONT), pieceTable);
 		}
 
 		// 左前側のSpot チーム視点の欲しい方角(左前)を基準方角に変換し、次のSpotを取得する
@@ -512,7 +507,7 @@ public class UserBoard {
 		Spot leftFront = mCurrentCloneBoard.getSpotFromCordinate(spot.mCordinate.getMovedCordinate(1, convedDirectionLeftF));
 		mLog.fine("exact leftFront(%s) -> Spot:%s ", convedDirectionLeftF, leftFront);
 		if(leftFront != null){
-			exactSpot(team, leftFront, uCordinate.getMovedCordinate(1, Direction.LEFT_FRONT));
+			exactSpot(team, leftFront, uCordinate.getMovedCordinate(1, Direction.LEFT_FRONT), pieceTable);
 		}
 
 	}
@@ -540,8 +535,17 @@ public class UserBoard {
 		// チームごとのルートとなるSpotを取得
 		Spot rootSpot = mCurrentCloneBoard.getSpotFromCordinate(mCurrentTeam.getRootCordinate());
 
+		// #25 パフォーマンス改善
+		// 再帰で呼び出すexactSpot内で以下の処理を毎回行っていたためここで作る
+		Map<Piece, UserPiece> pieceTable = new HashMap<>();
+		for(Set<UserPiece> set : mPieceTable.values()){
+			for(UserPiece up : set){
+				pieceTable.put(up.basePiece, up);
+			}
+		}
+
 		// ルートから、すべてのSpotの右前、左上と展開していく
-		exactSpot(mCurrentTeam, rootSpot, new UserCordinate(0, 0));
+		exactSpot(mCurrentTeam, rootSpot, new UserCordinate(0, 0), pieceTable);
 
 		// CurrentCloneBoardのSpotとCurrentBoardのBaseBoardの参照を同期する
 		for(int x=0; x<13; x++){
