@@ -8,9 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import common.DGLog;
 import common.TeamColor;
@@ -55,28 +53,17 @@ public class PointCalculator {
 			points.put(goalCordinate, new PointInfo());
 		}
 
-		// すでにGoal済みのCordinateにはPointInfoにMAX_POINTを入れる
-		for(Cordinate cordinate : points.keySet()){
-			Spot spot = board.getSpotFromCordinate(cordinate);
-			if(spot.mPiece != null && spot.mTeam == spot.mPiece.getmTeamColor()){
-				points.get(cordinate).mPoint = MAX_POINT;
-			}
-		}
-
-		/* 駒を持っていないGoalCordinateはルールにしたがってターゲットとなるPieceを決める */
-
-		// Pieceを持っていないGoalCordinate一覧を作成
-		List<Cordinate> notGoalCordinates = points.keySet().stream()
-											.filter((cordinate)->points.get(cordinate).mPoint != MAX_POINT)
-											.collect(Collectors.toList());
+		// #25 パフォーマンス改善
+		List<Cordinate> entryKeyList = new ArrayList<>(points.keySet());
 
 		// GoalCordinateを深い順にソートする(深いと大きな値になる=浅い順に-1をかける)
-		notGoalCordinates.sort((c1, c2)->compareCordinate(teamColor, c1, c2)*-1);
+		entryKeyList.sort((c1, c2)->compareCordinate(teamColor, c1, c2)*-1);
+
+		/* 駒を持っていないGoalCordinateはルールにしたがってターゲットとなるPieceを決める */
 
 		// ゴールしていないPiece一覧を取得
 		List<Piece> notGoalPieces = new ArrayList<>();
 		for(Piece piece : board.getPiecesFromTeam(teamColor)){
-			@SuppressWarnings("deprecation")
 			Spot spot = board.getSpotFromPiece(piece);
 			assert spot != null;
 			if(spot.mTeam != piece.getmTeamColor()){
@@ -87,44 +74,49 @@ public class PointCalculator {
 		// ゴールしていないPieceを初期位置から離れている順にソート
 		notGoalPieces.sort((p1, p2)->comparePiece(board, p1, p2)*-1);
 
-		// ゴールしていないCordinateとゴールしていないPieceを結びつける
-		for(int i=0; i<notGoalCordinates.size(); i++){
-			Cordinate cordinate = notGoalCordinates.get(i);
-			points.get(cordinate).mTargetPiece = notGoalPieces.get(i);
-		}
-
-		// ゴールとPieceの距離を計算する
-		for(Entry<Cordinate, PointInfo> entry : points.entrySet()){
-			Cordinate cordinate = entry.getKey();
-			PointInfo pointInfo = entry.getValue();
-
-			if(pointInfo.mPoint == MAX_POINT){
-				// すでにMAX_POINTがMAX=ゴール済みなら計算しない
-				continue;
+		// ポイントの計算
+		int notGoalPieceCounter = 0;
+		int sum                 = 0;
+		for(Cordinate cordinate : entryKeyList){
+			/* ゴール済みではないSpotに計算対象のPieceを結びつける */
+			Spot spot = board.getSpotFromCordinate(cordinate);
+			// ゴールしていればMAX_POINTを付ける
+			if(spot.mPiece != null && spot.mTeam == spot.mPiece.getmTeamColor()){
+				points.get(cordinate).mPoint = MAX_POINT;
+			}
+			// ゴールしていなければpieceを登録
+			else{
+				points.get(cordinate).mTargetPiece = notGoalPieces.get(notGoalPieceCounter);
+				notGoalPieceCounter++;
 			}
 
-			// ゴールの座標
-			Cordinate goalCordinate    = cordinate;
-			// 現在の座標
-			@SuppressWarnings("deprecation")
-			Cordinate currentCordinate = board.getSpotFromPiece(pointInfo.mTargetPiece).mCordinate;
-			// 初期位置の座標
-			Cordinate initCordinate    = getPieceInitCordinate(pointInfo.mTargetPiece);
+			/* 得点を計算 */
+			PointInfo pointInfo = points.get(cordinate);
+			if(pointInfo.mPoint == MAX_POINT){
+				// すでにMAX_POINTがMAXなら計算不要
+			}else{
+				// ゴールの座標
+				Cordinate goalCordinate    = cordinate;
+				// 現在の座標
+				Cordinate currentCordinate = board.getSpotFromPiece(pointInfo.mTargetPiece).mCordinate;
+				// 初期位置の座標
+				Cordinate initCordinate    = getPieceInitCordinate(pointInfo.mTargetPiece);
 
-			// 初期位置～ゴールの距離
-			int init2goal    = calcDistance(initCordinate, goalCordinate);
-			// 現在位置～ゴールの距離
-			int current2goal = calcDistance(currentCordinate, goalCordinate);
+				// 初期位置～ゴールの距離
+				int init2goal    = calcDistance(initCordinate, goalCordinate);
+				// 現在位置～ゴールの距離
+				int current2goal = calcDistance(currentCordinate, goalCordinate);
 
-			// ポイントの計算(ゴールまで残り10%なら90点を返す)
-			pointInfo.mPoint = (int)(100 - (((double)current2goal / init2goal)*100));
+				// ポイントの計算(ゴールまで残り10%なら90点を返す)
+				pointInfo.mPoint = (int)(100 - (((double)current2goal / init2goal)*100));
+			}
+
+			/* 得点合計を計算 */
+			sum += pointInfo.mPoint;
 		}
 
-		// ポイントの合計を返却する
-		int result = points.values().stream().mapToInt((pInfo)->pInfo.mPoint).sum();
-
-		mLog.fine("calcTeamPoint(%s) end -> %d", teamColor.getSimpleName(), result);
-		return result;
+		mLog.fine("calcTeamPoint(%s) end -> %d", teamColor.getSimpleName(), sum);
+		return sum;
 	}
 
 	/**
