@@ -158,7 +158,10 @@ public class PointCalculator {
 	 * @return
 	 */
 	private int calcDistance(Cordinate c1, Cordinate c2) {
+		/* #25 パフォーマンス改善
 		return (int)sqrt( pow(c1.x-c2.x, 2) + pow(c1.y-c2.y, 2) + pow(c1.z-c2.z, 2) );
+		 */
+		return (int)sqrt( (c1.x-c2.x)*(c1.x-c2.x) + (c1.y-c2.y)*(c1.y-c2.y) + (c1.z-c2.z)*(c1.z-c2.z) );
 	}
 
 	/**
