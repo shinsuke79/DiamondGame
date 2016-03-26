@@ -54,11 +54,13 @@ public class Board implements Cloneable {
 
 		// Pieceのコピー(参照のみ)
 		ret.mRedPieces = new Piece[10];
-		for(int i=0;i<10;i++){ ret.mRedPieces[i]    = mRedPieces[i]; };
 		ret.mYellowPieces = new Piece[10];
-		for(int i=0;i<10;i++){ ret.mYellowPieces[i] = mYellowPieces[i]; };
 		ret.mGreenPieces = new Piece[10];
-		for(int i=0;i<10;i++){ ret.mGreenPieces[i]  = mGreenPieces[i]; };
+		for(int i=0;i<10;i++){
+			ret.mRedPieces[i]    = mRedPieces[i];
+			ret.mYellowPieces[i] = mYellowPieces[i];
+			ret.mGreenPieces[i]  = mGreenPieces[i];
+		};
 
 		/* Piece-Spotテーブルの生成 */
 		ret.mPieceSpotTable = new HashMap<>(30);
