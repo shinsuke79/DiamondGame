@@ -1,4 +1,4 @@
-package user.yone.hillClimbingUser;
+package user.yone.breadthFirstSearch;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,18 +17,12 @@ import game.UserBoard.UserPiece;
 import user.User;
 import user.UserInfo;
 
-/**
- * 山登り法(hill climbing)を使用したユーザー<br>
- * 現状取りうる手の中で、一番UserCordinateのポイント(評価関数)が<br>
- * 高かった手を選択する
- * @author 0000140105
- *
- */
-public class HillClimbingUser extends User {
+public class BreadthFirstUser extends User {
 
 	private DGLog mLog;
+	private final int EXACT_LIMIT = 3;
 
-	public HillClimbingUser(UserInfo userInfo) {
+	public BreadthFirstUser(UserInfo userInfo) {
 		super(userInfo);
 
 		// ログの有効化
@@ -38,10 +32,84 @@ public class HillClimbingUser extends User {
 
 	@Override
 	protected void think(UserBoard userBoard, Move moveResult) {
-		say("山登り開始");
+		// Open/Closeリストの生成
+		List<Node> openList  = new ArrayList<>();
+		List<Node> closeList = new ArrayList<>();
 
-		// Nodeのリスト作成
+		// 開始ノードの作成
+		openList.add(createFirstNode(userBoard));
+
+		// 探索の開始
+		Node currentNode = null;
+		while(true){
+			// OpenListが空なら終了
+			if(openList.isEmpty()){
+				break;
+			}
+
+			// 先頭のノード取り出し
+			currentNode = openList.remove(0);
+
+			// ノードがゴールなら終了
+			if(currentNode.hn == 1000){
+				closeList.add(currentNode);
+				break;
+			}
+			// ノードが展開限界ならCloseリストに入れて次のNode
+			else if(currentNode.exactNum == EXACT_LIMIT ){
+				closeList.add(currentNode);
+				continue;
+			}
+			// その他のノードならノードを展開
+			else{
+				closeList.add(currentNode);
+				List<Node> children = exactNode(userBoard, currentNode);
+				for(Node child : children){
+					openList.add(child);
+				}
+				continue;
+			}
+		}
+
+		// CloseListをhn最大順にソート
+		closeList.sort((n1, n2)-> (n1.hn - n2.hn)*-1 );
+
+		// hnが最大のもののみ抽出
+		int maxSize = closeList.get(0).hn;
+		List<Node> maxNodes = closeList.stream().filter((n)->n.hn == maxSize).collect(Collectors.toList());
+		Collections.shuffle(maxNodes);
+
+		// 決めたNodeを辿って今回の一手を決める
+		currentNode    = maxNodes.get(0);
+		Node firstNode = null;
+		while(true){
+			if(currentNode.parent != null && currentNode.parent.parent == null){
+				firstNode = currentNode;
+				break;
+			}
+		}
+
+		// resultMoveに代入
+		Move result = firstNode.moveList.get(0);
+		moveResult.mPiece = result.mPiece;
+		for(Cordinate c : result.mMoveSpots){
+			moveResult.mMoveSpots.add(c);
+		}
+	}
+
+	/**
+	 * 指定されたNodeから展開できるNodeをすべて作成する
+	 * @param currentNode
+	 * @return
+	 */
+	private List<Node> exactNode(UserBoard userBoard, Node currentNode) {
 		List<Node> nodeList = new ArrayList<>();
+
+		// currentNodeの値を使用して、UserBoardの状態を更新
+		userBoard.init();
+		for(Move move : currentNode.moveList){
+			userBoard.move(move);
+		}
 
 		// 移動できる駒を取得
 		Set<UserPiece> movableUserPieces = userBoard.getMovableUserPieces(getMyTeam());
@@ -64,37 +132,48 @@ public class HillClimbingUser extends User {
 				say("移動の%s->%sから作られたMoveは%dつ。", userCordinate, nextCordinate, moveList.size());
 				// 各MoveをNodeにしてNodeListに追加(その時hnも更新)
 				for(Move move : moveList){
-					Node node = new Node();
-					userBoard.init();
-					userBoard.move(move);
-					node.hn = userBoard.getPoint(getMyTeam());
-					userBoard.init();
+					Node node = currentNode.cloneNode();
 					node.moveList.add(move);
+					userBoard.init();
+					for(Move m : node.moveList){
+						userBoard.move(move);
+					}
+					node.hn = userBoard.getPoint(getMyTeam());
+					node.exactNum++;
+					userBoard.init();
 					nodeList.add(node);
 					say("%sのPointは%d", move, node.hn);
 				}
 			}
 		}
 		say("探索完了. nodeListのサイズ:%d ", nodeList.size());
+		return nodeList;
+	}
 
-		// nodeListをソート(hnが大きい順)
-		nodeList.sort((n1, n2)-> (n1.hn-n2.hn)*-1 );
+	private Node createFirstNode(UserBoard userBoard) {
+		Node ret = new Node();
+		userBoard.init();
+		ret.hn = userBoard.getPoint(getMyTeam());
+		userBoard.init();
+		return ret;
+	}
 
-		int maxSize = nodeList.get(0).hn;
-		List<Node> maxNodes = nodeList.stream().filter((n)->n.hn == maxSize).collect(Collectors.toList());
-		Collections.shuffle(maxNodes);
+	@Override
+	public void handShake(User handShakeUser, TeamColor teamColor) {
+		// NOP
+	}
 
-		say("頂上に到着!! h(n):%d List:%s", maxNodes.get(0).hn, maxNodes.get(0).moveList);
-		Move result = maxNodes.get(0).moveList.get(0);
-		moveResult.mPiece = result.mPiece;
-		for(Cordinate c : result.mMoveSpots){
-			moveResult.mMoveSpots.add(c);
-		}
+	@Override
+	public void notifyCancelled() {
+		// NOP
+	}
 
+	public void say(String fmt, Object... args){
+		mLog.info("優柔不断"+getName()+"「"+fmt+"」", args);
 	}
 
 	/**
-	 * 指定されたSpotからSpotへ移動した場合に考えられるMove一覧を返却します
+	 * 指定されたSpotからSpotへ移動した場合に考えうるMove一覧を返却します
 	 * @param userBoard
 	 * @param uPiece
 	 * @param from
@@ -119,12 +198,12 @@ public class HillClimbingUser extends User {
 		}
 
 		// 2マス移動ならここから再帰的にResultに登録していく
-		exact(userBoard, footPrints, result, move, to);
+		exactMove(userBoard, footPrints, result, move, to);
 
 		return result;
 	}
 
-	private void exact(UserBoard userBoard, Set<UserCordinate> footPrints, List<Move> result, Move baseMove, UserCordinate cordinate){
+	private void exactMove(UserBoard userBoard, Set<UserCordinate> footPrints, List<Move> result, Move baseMove, UserCordinate cordinate){
 		// 移動先一覧を取得
 		Set<UserCordinate> movableCordinates = userBoard.getMovableCordinates(cordinate, false);
 
@@ -143,22 +222,8 @@ public class HillClimbingUser extends User {
 			move.mMoveSpots.add(userBoard.getCordinateFromUserCordinate(nextCordinate));
 			result.add(move);
 			footPrints.add(nextCordinate);
-			exact(userBoard, footPrints, result, move, nextCordinate);
+			exactMove(userBoard, footPrints, result, move, nextCordinate);
 		}
-	}
-
-	public void say(String fmt, Object... args){
-		mLog.info("山登り"+getName()+"「"+fmt+"」", args);
-	}
-
-	@Override
-	public void handShake(User handShakeUser, TeamColor teamColor) {
-		// NOP
-	}
-
-	@Override
-	public void notifyCancelled() {
-		// NOP
 	}
 
 	/**
@@ -170,11 +235,13 @@ public class HillClimbingUser extends User {
 		List<Move> moveList;
 		int hn;
 		Node parent;
+		int exactNum;
 
 		public Node() {
 			this.moveList = new ArrayList<>();
 			this.hn       = 0;
 			this.parent   = null;
+			this.exactNum = 0;
 		}
 
 		public Node cloneNode(){
@@ -184,9 +251,9 @@ public class HillClimbingUser extends User {
 			for(Move move : this.moveList){
 				clone.moveList.add(move.cloneMove());
 			}
-			clone.parent = this;
+			clone.parent   = this;
+			clone.exactNum = this.exactNum;
 			return clone;
 		}
 	}
-
 }
