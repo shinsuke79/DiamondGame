@@ -17,10 +17,17 @@ import game.UserBoard.UserPiece;
 import user.User;
 import user.UserInfo;
 
+/**
+ * 幅優先探索でNターン先までのユーザーが選択できる駒移動 全パターンを予測し、<br>
+ * その中の最適解を選択する慎重なユーザーです。<br>
+ * Nターンは定数EXACT_LIMITを変更することで調整できます
+ * @author yone
+ *
+ */
 public class BreadthFirstUser extends User {
 
 	private DGLog mLog;
-	private final int EXACT_LIMIT = 3;
+	private final int EXACT_LIMIT = 2;
 
 	public BreadthFirstUser(UserInfo userInfo) {
 		super(userInfo);
@@ -32,6 +39,8 @@ public class BreadthFirstUser extends User {
 
 	@Override
 	protected void think(UserBoard userBoard, Move moveResult) {
+		say("慎重に探索開始");
+
 		// Open/Closeリストの生成
 		List<Node> openList  = new ArrayList<>();
 		List<Node> closeList = new ArrayList<>();
@@ -42,28 +51,38 @@ public class BreadthFirstUser extends User {
 		// 探索の開始
 		Node currentNode = null;
 		while(true){
+			tweet("--------------------------------------------------------------------");
+			tweet("ループ先頭。");
+			tweet("OPEN数:%d", openList.size());
+			tweet("CLOSE数:%d", closeList.size());
+
 			// OpenListが空なら終了
 			if(openList.isEmpty()){
+				say("もう探索するところはないな");
 				break;
 			}
 
 			// 先頭のノード取り出し
 			currentNode = openList.remove(0);
+			tweet("現在のノード:%s", currentNode);
 
 			// ノードがゴールなら終了
 			if(currentNode.hn == 1000){
 				closeList.add(currentNode);
+				tweet("ゴールに到達。終了");
 				break;
 			}
 			// ノードが展開限界ならCloseリストに入れて次のNode
 			else if(currentNode.exactNum == EXACT_LIMIT ){
 				closeList.add(currentNode);
+				tweet("もう限界");
 				continue;
 			}
 			// その他のノードならノードを展開
 			else{
 				closeList.add(currentNode);
 				List<Node> children = exactNode(userBoard, currentNode);
+				tweet("ノードを展開。展開したNode数:%d", children.size());
 				for(Node child : children){
 					openList.add(child);
 				}
@@ -74,20 +93,31 @@ public class BreadthFirstUser extends User {
 		// CloseListをhn最大順にソート
 		closeList.sort((n1, n2)-> (n1.hn - n2.hn)*-1 );
 
-		// hnが最大のもののみ抽出
-		int maxSize = closeList.get(0).hn;
-		List<Node> maxNodes = closeList.stream().filter((n)->n.hn == maxSize).collect(Collectors.toList());
-		Collections.shuffle(maxNodes);
+		// exactNumが0のものは消去する
+		closeList = closeList.stream().filter((n)->n.exactNum != 0).collect(Collectors.toList());
+
+		// exactNumが1かつhn=1000があればそれを選択する
+		List<Node> lastHands = closeList.stream().filter((n)->n.exactNum == 1 && n.hn == 1000).collect(Collectors.toList());
+		if(lastHands.isEmpty()){
+			// hnが最大のもののみ抽出
+			int maxSize = closeList.get(0).hn;
+			lastHands = closeList.stream().filter((n)->n.hn == maxSize).collect(Collectors.toList());
+			Collections.shuffle(lastHands);
+		}
+		say("%dパターン考えましたが, %dターンでの最大点は%dみたいです", closeList.size(), EXACT_LIMIT, lastHands.get(0).hn);
 
 		// 決めたNodeを辿って今回の一手を決める
-		currentNode    = maxNodes.get(0);
+		currentNode    = lastHands.get(0);
+		say("%sを辿って今回の一手を決めます", currentNode);
 		Node firstNode = null;
 		while(true){
-			if(currentNode.parent != null && currentNode.parent.parent == null){
+			if(currentNode.parent != null && currentNode.parent.exactNum == 0){
 				firstNode = currentNode;
 				break;
 			}
+			currentNode = currentNode.parent;
 		}
+		say("今回のNode:%s", firstNode);
 
 		// resultMoveに代入
 		Move result = firstNode.moveList.get(0);
@@ -105,48 +135,45 @@ public class BreadthFirstUser extends User {
 	private List<Node> exactNode(UserBoard userBoard, Node currentNode) {
 		List<Node> nodeList = new ArrayList<>();
 
-		// currentNodeの値を使用して、UserBoardの状態を更新
-		userBoard.init();
-		for(Move move : currentNode.moveList){
-			userBoard.move(move);
+		tweet("+++++");
+		tweet("%sのノードから作られるノードを洗い出します(hn:%d exNum:%d)", currentNode, currentNode.hn, currentNode.exactNum);
+		tweet("%sの親:%s", currentNode, currentNode.parent);
+		for(int i=0; i<currentNode.moveList.size(); i++){
+			tweet("move1: %s -> %s", currentNode.moveList.get(i).mPiece, currentNode.moveList.get(i).mMoveSpots);
 		}
+
+		// currentNodeの値を使用して、UserBoardの状態を更新
+		updateUserBoard(userBoard, currentNode);
 
 		// 移動できる駒を取得
 		Set<UserPiece> movableUserPieces = userBoard.getMovableUserPieces(getMyTeam());
-		say("探索するPieceは%dつ[%s]",movableUserPieces.size(), movableUserPieces.stream()
+		tweet("探索するPieceは%dつ[%s]",movableUserPieces.size(), movableUserPieces.stream()
 											.map((pi)->pi.getNameStr()).collect(Collectors.toList()));
 
 		// 移動できる駒が移動できるCordinatesを探し、そこからMoveを洗い出す
 		for(UserPiece uPiece : movableUserPieces){
-			say("移動元の駒が%sの場合の探索",uPiece.getNameStr());
 			// 移動元PieceのSpot取得
+			updateUserBoard(userBoard, currentNode);
 			UserCordinate userCordinate = userBoard.getUserCordinateFromPiece(uPiece);
 			assert userCordinate != null;
 			// 移動先候補を取得
 			Set<UserCordinate> movableCordinates = userBoard.getMovableCordinates(userCordinate);
-			say("移動先の候補は%dつ。", movableCordinates.size());
 			for(UserCordinate nextCordinate : movableCordinates){
-				say("移動先の%sから作られるMoveを洗い出す", nextCordinate);
 				// 移動先候補から作成されうるMove一覧を取得
 				List<Move> moveList =  createMoves(userBoard, uPiece, userCordinate, nextCordinate);
-				say("移動の%s->%sから作られたMoveは%dつ。", userCordinate, nextCordinate, moveList.size());
+				tweet("移動の%s->%sから作られたMoveは%dつ。", userCordinate, nextCordinate, moveList.size());
 				// 各MoveをNodeにしてNodeListに追加(その時hnも更新)
 				for(Move move : moveList){
 					Node node = currentNode.cloneNode();
 					node.moveList.add(move);
-					userBoard.init();
-					for(Move m : node.moveList){
-						userBoard.move(move);
-					}
+					updateUserBoard(userBoard, node);
 					node.hn = userBoard.getPoint(getMyTeam());
 					node.exactNum++;
-					userBoard.init();
 					nodeList.add(node);
-					say("%sのPointは%d", move, node.hn);
 				}
 			}
 		}
-		say("探索完了. nodeListのサイズ:%d ", nodeList.size());
+		tweet("探索完了. nodeListのサイズ:%d ", nodeList.size());
 		return nodeList;
 	}
 
@@ -154,6 +181,7 @@ public class BreadthFirstUser extends User {
 		Node ret = new Node();
 		userBoard.init();
 		ret.hn = userBoard.getPoint(getMyTeam());
+		say("最初のNode作成: %s", ret);
 		userBoard.init();
 		return ret;
 	}
@@ -170,6 +198,10 @@ public class BreadthFirstUser extends User {
 
 	public void say(String fmt, Object... args){
 		mLog.info("優柔不断"+getName()+"「"+fmt+"」", args);
+	}
+
+	public void tweet(String fmt, Object... args){
+		mLog.fine("優柔不断"+getName()+"「"+fmt+"」", args);
 	}
 
 	/**
@@ -226,6 +258,13 @@ public class BreadthFirstUser extends User {
 		}
 	}
 
+	private void updateUserBoard(UserBoard userBoard, Node node){
+		userBoard.init();
+		for(Move m : node.moveList){
+			userBoard.move(m);
+		}
+	}
+
 	/**
 	 * 山登り方でのノード. 同じ状態で別ノードがあっても問題ないのでequalsとかは実装しない
 	 * @author 0000140105
@@ -254,6 +293,10 @@ public class BreadthFirstUser extends User {
 			clone.parent   = this;
 			clone.exactNum = this.exactNum;
 			return clone;
+		}
+
+		public String toString(){
+			return String.format("%s(h:%d e:%d)", moveList, hn, exactNum);
 		}
 	}
 }
