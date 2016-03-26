@@ -548,18 +548,10 @@ public class UserBoard {
 		exactSpot(mCurrentTeam, rootSpot, new UserCordinate(0, 0), pieceTable);
 
 		// CurrentCloneBoardのSpotとCurrentBoardのBaseBoardの参照を同期する
-		for(int x=0; x<13; x++){
-			for(int y=0; y<13; y++){
-				for(int z=0; z<13; z++){
-					Spot spot = mCurrentCloneBoard.mSpots[x][y][z];
-					if(spot != null){
-						UserSpot userSpot = mUserSpotTable.get(spot.mCordinate);
-						if(userSpot != null){
-							userSpot.baseSpot = spot;
-						}
-					}
-				}
-			}
+		for(UserSpot uSpot : mUserSpotTable.values()){
+			// 過去に登録していたSpotのCordinateを参照
+			Cordinate cordinate = uSpot.baseSpot.mCordinate;
+			uSpot.baseSpot = mCurrentCloneBoard.getSpotFromCordinate(cordinate);
 		}
 	}
 
