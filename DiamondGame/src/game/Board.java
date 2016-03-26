@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.IntPredicate;
 import java.util.stream.Collectors;
 
 import common.DGLog;
@@ -555,10 +554,15 @@ public class Board implements Cloneable {
 	 * @return
 	 */
 	private boolean checkCordinate(Cordinate cordinate){
+		/* #25 パフォーマン改善
 		IntPredicate checker = (c)->(0<=c && c<=12);
 		boolean result = checker.test(cordinate.x)
 				&& checker.test(cordinate.y)
 				&& checker.test(cordinate.z);
+		*/
+		boolean result = (0 <= cordinate.x && cordinate.x<=12)
+						&& (0 <= cordinate.y && cordinate.y<=12)
+						&& (0 <= cordinate.z && cordinate.z<=12);
 		mLog.fine("checkCordinate cordinate:%s result:%b", cordinate, result);
 		return result;
 	}
