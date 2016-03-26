@@ -27,7 +27,7 @@ import user.UserInfo;
 public class BreadthFirstUser extends User {
 
 	private DGLog mLog;
-	private final int EXACT_LIMIT = 3;
+	private final int EXACT_LIMIT = 2;
 
 	public BreadthFirstUser(UserInfo userInfo) {
 		super(userInfo);
