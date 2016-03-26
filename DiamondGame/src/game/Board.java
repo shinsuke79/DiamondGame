@@ -23,6 +23,7 @@ public class Board implements Cloneable {
 	Piece[] mRedPieces;
 	Piece[] mYellowPieces;
 	Piece[] mGreenPieces;
+	Map<Piece, Spot> mPieceSpotTable;
 	DGLog   mLog;
 	PointCalculator mPointCalculator;
 
@@ -59,6 +60,9 @@ public class Board implements Cloneable {
 		ret.mGreenPieces = new Piece[10];
 		for(int i=0;i<10;i++){ ret.mGreenPieces[i]  = mGreenPieces[i]; };
 
+		/* Piece-Spotテーブルの生成 */
+		ret.mPieceSpotTable = new HashMap<>(30);
+
 		// Spotsのコピー(状態はコピーするがSpotはnewする)
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
@@ -67,6 +71,10 @@ public class Board implements Cloneable {
 					if(spot != null){
 						ret.mSpots[x][y][z] = new Spot(spot.mTeam, spot.mPiece);
 						ret.mSpots[x][y][z].setCoordinate(x, y, z);
+						// Piece-Spotテーブルの変換
+						if(spot.mPiece != null){
+							ret.mPieceSpotTable.put(spot.mPiece, ret.mSpots[x][y][z]);
+						}
 					}
 				}
 			}
@@ -88,6 +96,9 @@ public class Board implements Cloneable {
 
 		/* Calculatorの生成 */
 		mPointCalculator = new PointCalculator();
+
+		/* Piece - Spotの変換テーブル */
+		mPieceSpotTable  = new HashMap<>(30);
 
 		/* Piece配列の初期化 */
 		mRedPieces = new Piece[10];
@@ -161,7 +172,7 @@ public class Board implements Cloneable {
 			}
 		}
 
-		/* PointCalculatorに情報を登録 */
+		/* PointCalculatorとmPieceSpotTableに情報を登録 */
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
 				for(int z=0; z<13; z++){
@@ -174,6 +185,10 @@ public class Board implements Cloneable {
 						// 駒の初期値であればその位置の座標を登録
 						if(spot.mPiece != null){
 							mPointCalculator.addPieceInitCordinate(spot.mPiece, spot.mCordinate);
+						}
+						/* Piece - Spotのテーブルに登録 */
+						if(spot.mPiece != null){
+							mPieceSpotTable.put(spot.mPiece, spot);
 						}
 					}
 				}
@@ -281,6 +296,7 @@ public class Board implements Cloneable {
 		Piece piece = currentSpot.mPiece;
 		currentSpot.mPiece = null;
 		nextSpot.mPiece    = piece;
+		mPieceSpotTable.put(piece, nextSpot);
 		mLog.fine("movePiece %s -> %s", currentSpot, nextSpot);
 	}
 
@@ -582,11 +598,11 @@ public class Board implements Cloneable {
 
 	/**
 	 * 指定されたPieceが存在するSpotを返却する<br>
-	 * @deprecated PieceからSpotを取得するのには無駄に計算量を必要とします
 	 * @param piece
 	 * @return
 	 */
 	Spot getSpotFromPiece(Piece piece) {
+		/*
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
 				for(int z=0; z<13; z++){
@@ -597,6 +613,10 @@ public class Board implements Cloneable {
 			}
 		}
 		return null;
+		*/
+		Spot spot = mPieceSpotTable.get(piece);
+		assert spot != null;
+		return spot;
 	}
 
 	/**
