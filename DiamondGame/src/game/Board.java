@@ -782,7 +782,6 @@ public class Board implements Cloneable {
 		public Cordinate getMovedCordinate(int distance, Direction direction) {
 			Log.fine("getMovedCordinate this:%s direction:%s distance:%d", this, direction, distance);
 			assert distance == 2 || distance == 1;
-			Cordinate result = this.clone();
 
 			int dx=0, dy=0, dz=0;
 
@@ -819,9 +818,7 @@ public class Board implements Cloneable {
 				break;
 			}
 
-			result.x += dx;
-			result.y += dy;
-			result.z += dz;
+			Cordinate result = new Cordinate(this.x+dx, this.y+dy, this.z+dz);
 
 			Log.fine("getMovedCordinate result:%s ", result);
 			return result;
