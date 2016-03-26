@@ -40,6 +40,8 @@ public class BreadthFirstUser extends User {
 	@Override
 	protected void think(UserBoard userBoard, Move moveResult) {
 		say("慎重に探索開始");
+		StopWatch watch = new StopWatch();
+		watch.start();
 
 		// Open/Closeリストの生成
 		List<Node> openList  = new ArrayList<>();
@@ -125,6 +127,11 @@ public class BreadthFirstUser extends User {
 		for(Cordinate c : result.mMoveSpots){
 			moveResult.mMoveSpots.add(c);
 		}
+
+		watch.stop();
+		StopWatch.addTime(watch.getMilliSec());
+		say("やっと終わった... %dMsec %dSec", watch.getMilliSec(), watch.getSec());
+		StopWatch.printStatus();
 	}
 
 	/**
@@ -297,6 +304,36 @@ public class BreadthFirstUser extends User {
 
 		public String toString(){
 			return String.format("%s(h:%d e:%d)", moveList, hn, exactNum);
+		}
+	}
+
+	static class StopWatch {
+		static List<Long> timeList = new ArrayList<>();
+
+		private long start;
+		private long end;
+		public StopWatch() {
+		}
+		public void start(){
+			start = System.nanoTime();
+		}
+		public void stop(){
+			end   = System.nanoTime();
+		}
+		public long getMilliSec(){
+			return (end - start)/(1000*1000);
+		}
+		public long getSec(){
+			return (end - start)/(1000*1000*1000);
+		}
+		public static void addTime(long time){
+			timeList.add(time);
+		}
+		public static void printStatus(){
+			System.out.printf("Time Size:%d \n", timeList.size());
+			System.out.printf("Max Time:%dMsec \n", timeList.stream().mapToLong((t)->t).max().getAsLong());
+			System.out.printf("Min Time:%dMsec \n", timeList.stream().mapToLong((t)->t).min().getAsLong());
+			System.out.printf("Min Time:%dMsec \n", (long)timeList.stream().mapToDouble((t)->t).average().getAsDouble());
 		}
 	}
 }
