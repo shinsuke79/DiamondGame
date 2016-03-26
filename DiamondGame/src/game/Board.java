@@ -263,7 +263,7 @@ public class Board implements Cloneable {
 		// 移動が妥当であることの確認
 		if(!isMoveValid(move, isSilent)){
 			// ありえない
-			assert false;
+			// assert false;
 			return;
 		}
 

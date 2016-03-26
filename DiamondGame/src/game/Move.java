@@ -47,7 +47,7 @@ public class Move {
 	@Override
 	public String toString() {
 		return "Move [mTeam=" + mTeam.getName()
-			+ ", mPiece=" + mPiece != null ? mPiece.getNameStr():"null"
+			+ ", mPiece=" + (mPiece != null ? mPiece.getNameStr():"null")
 			+ ", mMoveSpots=" + mMoveSpots + "]";
 	}
 }
