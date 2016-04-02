@@ -333,7 +333,7 @@ public class BreadthFirstUser extends User {
 			System.out.printf("Time Size:%d \n", timeList.size());
 			System.out.printf("Max Time:%dMsec \n", timeList.stream().mapToLong((t)->t).max().getAsLong());
 			System.out.printf("Min Time:%dMsec \n", timeList.stream().mapToLong((t)->t).min().getAsLong());
-			System.out.printf("Min Time:%dMsec \n", (long)timeList.stream().mapToDouble((t)->t).average().getAsDouble());
+			System.out.printf("Average :%dMsec \n", (long)timeList.stream().mapToDouble((t)->t).average().getAsDouble());
 		}
 	}
 }
