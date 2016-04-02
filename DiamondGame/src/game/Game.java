@@ -1,6 +1,7 @@
 package game;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import common.DGLog;
 import common.TeamColor;
 import user.User;
 import user.humanUser.HumanUser;
+import view.Event.GameFinishedEvent;
 import view.UserInterface;
 
 /**
@@ -26,6 +28,7 @@ public class Game {
 	List<TeamColor> mGoalTeams;
 	int        mTernNo;
 	DGLog   mLog;
+	boolean mIsFinished;
 
 	public Game(GameConfig gameConfig) {
 		assert gameConfig != null;
@@ -33,6 +36,8 @@ public class Game {
 
 		mLog = new DGLog(getClass().getSimpleName() + "#" + Integer.toHexString(this.hashCode()));
 		mLog.info("Create " + getClass().getSimpleName());
+
+		mIsFinished = false;
 	}
 
 	/**
@@ -101,11 +106,30 @@ public class Game {
 		mLog.info("createBoard end");
 	}
 
-	/* ゲームをする気持ちになる */
+	/* ゲームをする雰囲気になる */
 	public void startGame() {
 		mLog.info("startGame start");
+		mIsFinished = false;
 		mGameMaster.startGame();
 		mLog.info("startGame end");
+	}
+
+	/* ゲームを終了する雰囲気になる */
+	public void finishGame(){
+		mLog.info("finishGame start");
+
+		// 内部状態の変更
+		mIsFinished = true;
+
+		// イベントの送信
+		ArrayList<TeamColor> goalTeams = new ArrayList<>(mGoalTeams);
+		EnumMap<TeamColor, Integer> teamPoints = new EnumMap<>(TeamColor.class);
+		for(TeamColor tc : TeamColor.values()){
+			teamPoints.put(tc, getTeamPoint(tc));
+		}
+		mUI.notifyEvent(new GameFinishedEvent(goalTeams, teamPoints));
+
+		mLog.info("finishGame end");
 	}
 
 	/**
@@ -201,5 +225,9 @@ public class Game {
 		int teamPoint = mBoard.getGoalPieceCount(teamColor);
 		mLog.fine("getTeamPoint %s -> %d", teamColor, teamPoint);
 		return teamPoint;
+	}
+
+	public boolean isFinished() {
+		return mIsFinished;
 	}
 }

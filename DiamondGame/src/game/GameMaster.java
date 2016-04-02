@@ -153,6 +153,7 @@ public class GameMaster implements Runnable {
 		}else{
 			// ゲーム終了をUIに通知
 			mLog.info("Finish game! ");
+			mGame.finishGame();
 			mState = State.TERMINATE;
 		}
 	}

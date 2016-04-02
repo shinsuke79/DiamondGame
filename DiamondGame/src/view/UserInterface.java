@@ -22,6 +22,8 @@ public interface UserInterface {
 	 */
 	void start();
 
+	void notifyEvent(Event event);
+
 	/**
 	 * ゲームとユーザーの記録を管理するManagerを設定する。
 	 * これらをメンバ変数に覚えておく必要がある

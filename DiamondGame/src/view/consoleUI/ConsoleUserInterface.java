@@ -6,9 +6,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +27,8 @@ import user.User;
 import user.UserInfo;
 import user.UserManager;
 import user.humanUser.HumanUser;
+import view.Event;
+import view.Event.GameFinishedEvent;
 import view.UserInterface;
 
 public class ConsoleUserInterface implements UserInterface, Runnable {
@@ -34,12 +38,14 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 	private DGLog       mLog;
 	private GameConfig  mGameConfig;
 	private Game mGame;
+	private Queue<Event> mEvents;
 
 	public ConsoleUserInterface() {
 		mState   = State.INIT;
 		mLog     = new DGLog(this.getClass().getSimpleName());
 		mGameConfig = null;
 		mGame       = null;
+		mEvents = new LinkedList<>();
 	}
 
 	@Override
@@ -69,7 +75,38 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		case WAIT_START:
 			procInWaitStart();
 			break;
+		case RUNNING:
+			procInRunning();
+			break;
 		}
+	}
+
+	private void procInRunning() {
+		Event event = getEvent();
+		if(event == null){
+			return;
+		}
+
+		switch(event.getEventId()){
+		case GAME_FINISHED:
+			assert event instanceof GameFinishedEvent;
+			receiveGameFinishedEvent((GameFinishedEvent)event);
+			break;
+		}
+	}
+
+	private void receiveGameFinishedEvent(GameFinishedEvent event){
+		List<TeamColor> goalTeams = event.getGoalTeams();
+		StringBuilder result = new StringBuilder("");
+		if(!goalTeams.isEmpty()){
+			for(int i=0; i<goalTeams.size(); i++){
+				result.append(String.format("%d位:%s ", i+1, goalTeams.get(i)));
+			}
+		}else{
+			result.append("誰もゴール出来ませんでした");
+		}
+		System.out.println("ゲーム終了! 結果=>" + result);
+		mState = State.TERMINATE;
 	}
 
 	private void procInWaitStart() {
@@ -421,6 +458,15 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 
 		// 変換できたらリターン
 		return inputUiSpot;
+	}
+
+	@Override
+	public synchronized void notifyEvent(Event event) {
+		mEvents.add(event);
+	}
+
+	private synchronized Event getEvent(){
+		return mEvents.poll();
 	}
 }
 
