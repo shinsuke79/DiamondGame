@@ -155,9 +155,9 @@ public class Game {
 	 * @return
 	 */
 	public TeamColor getNextTeam() {
-		TeamColor nextTeam = null;
+		TeamColor nextTeam = mCurrentTeam;
 		while(true){
-			nextTeam = mCurrentTeam.getNext();
+			nextTeam = nextTeam.getNext();
 			if(!mGoalTeams.contains(nextTeam)){
 				break;
 			}
@@ -193,7 +193,7 @@ public class Game {
 	}
 
 	public List<TeamColor> getGoalTeams() {
-		mLog.info("getGoalTeams %s", mGoalTeams);
+		mLog.fine("getGoalTeams %s", mGoalTeams);
 		return mGoalTeams;
 	}
 

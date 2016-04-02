@@ -27,7 +27,7 @@ import user.UserInfo;
 public class BreadthFirstUserNext extends User {
 
 	private DGLog mLog;
-	private final int    EXACT_LIMIT = 4;
+	private final int    EXACT_LIMIT = 3;
 	/**
 	 * OpenListに新たなノードを追加する際に比較対象のhnに反映させる係数
 	 * 小さくすればパフォーマンスは下がるが探索の幅が広がる
@@ -345,10 +345,12 @@ public class BreadthFirstUserNext extends User {
 			timeList.add(time);
 		}
 		public static void printStatus(){
+			/*
 			System.out.printf("Time Size:%d \n", timeList.size());
 			System.out.printf("Max Time:%dMsec \n", timeList.stream().mapToLong((t)->t).max().getAsLong());
 			System.out.printf("Min Time:%dMsec \n", timeList.stream().mapToLong((t)->t).min().getAsLong());
 			System.out.printf("Average :%dMsec \n", (long)timeList.stream().mapToDouble((t)->t).average().getAsDouble());
+			*/
 		}
 	}
 }

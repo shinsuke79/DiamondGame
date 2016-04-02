@@ -177,6 +177,7 @@ public class GameMaster implements Runnable {
 				mGame.getGoalTeams().add(tc);
 			}
 		}
+		mLog.info("updateGoalTeams %s", mGame.getGoalTeams());
 	}
 
 	/**
