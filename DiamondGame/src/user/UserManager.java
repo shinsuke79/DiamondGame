@@ -6,8 +6,8 @@ import java.util.List;
 import common.DGLog;
 import user.humanUser.HumanUser;
 import user.yone.breadthFirstSearch.BreadthFirstUser;
+import user.yone.breadthFirstSearch.BreadthFirstUserNext;
 import user.yone.hillClimbingUser.HillClimbingUser;
-import user.yone.obakaUser.ObakaUser;
 
 public class UserManager {
 	ArrayList<UserInfo> mUsers;
@@ -31,9 +31,9 @@ public class UserManager {
 
 	public User createUser(UserInfo userInfo) {
 		switch(userInfo.getName()){
-		case "Player1": return new BreadthFirstUser(userInfo);
-		case "Player2": return new HillClimbingUser(userInfo);
-		case "Player3": return new ObakaUser(userInfo);
+		case "Player1": return new BreadthFirstUserNext(userInfo);
+		case "Player2": return new BreadthFirstUser(userInfo);
+		case "Player3": return new HillClimbingUser(userInfo);
 		}
 		return new HumanUser(userInfo);
 /*
