@@ -17,10 +17,12 @@ import java.util.stream.Collectors;
 import common.DGConfig;
 import common.DGLog;
 import common.TeamColor;
+import game.Board.Cordinate;
 import game.Game;
 import game.GameConfig;
 import game.GameManager;
 import game.GameMaster;
+import game.Move;
 import game.UserBoard;
 import game.UserBoard.UserCordinate;
 import user.User;
@@ -28,7 +30,12 @@ import user.UserInfo;
 import user.UserManager;
 import user.humanUser.HumanUser;
 import view.Event;
+import view.Event.ChangeTernEvent;
 import view.Event.GameFinishedEvent;
+import view.Event.GameStartedEvent;
+import view.Event.PieceMovedEvent;
+import view.Event.PointChangedEvent;
+import view.Event.TeamReachedGoalEvent;
 import view.UserInterface;
 
 public class ConsoleUserInterface implements UserInterface, Runnable {
@@ -88,11 +95,88 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		}
 
 		switch(event.getEventId()){
+		case GAME_STARTED:
+			assert event instanceof GameStartedEvent;
+			receiveGameStartedEvent((GameStartedEvent)event);
+			break;
+		case CHANGE_TERN:
+			assert event instanceof ChangeTernEvent;
+			receiveChangeTernEvent((ChangeTernEvent)event);
+			break;
+		case PIECE_MOVED:
+			assert event instanceof PieceMovedEvent;
+			receivePieceMovedEvent((PieceMovedEvent)event);
+			break;
+		case POINT_CHANGED:
+			assert event instanceof PointChangedEvent;
+			receivePointChangedEvent((PointChangedEvent)event);
+			break;
+		case TEAM_REACHED_GOAL:
+			assert event instanceof TeamReachedGoalEvent;
+			receiveTeamReachedGoalEvent((TeamReachedGoalEvent)event);
+			break;
 		case GAME_FINISHED:
 			assert event instanceof GameFinishedEvent;
 			receiveGameFinishedEvent((GameFinishedEvent)event);
 			break;
 		}
+	}
+
+	private void receiveTeamReachedGoalEvent(TeamReachedGoalEvent event) {
+		TeamColor goalTeam = event.getGoalTeam();
+		List<TeamColor> goalTeams = event.getGoalTeams();
+		UserInfo goalUser = event.getGoalUser();
+		System.out.println("========================================================");
+		System.out.printf ("= ★%s(%s)がゴールしました！★ \n", goalTeam.getName(), goalUser.getName());
+		System.out.printf ("= ゴールチーム：%s \n", goalTeams);
+		System.out.println("========================================================");
+	}
+
+	private void receivePointChangedEvent(PointChangedEvent event) {
+		// NOP
+	}
+
+	private void receivePieceMovedEvent(PieceMovedEvent event) {
+		TeamColor team = event.getTeam();
+		Move move = event.getMove();
+		Cordinate firstCordinate = event.getFirstCordinate();
+		StringBuilder moves = new StringBuilder("");
+		for(int i=0; i<move.mMoveSpots.size(); i++){
+			moves.append(move.mMoveSpots.get(i).getNameStr());
+			if(i != move.mMoveSpots.size()-1){
+				moves.append(" => ");
+			}
+		}
+		System.out.println("========================================================");
+		System.out.printf ("= %sが駒を移動させました \n", team.getName());
+		System.out.printf ("= 移動させる駒:%s(%s) \n", move.mPiece.getNameStr(), firstCordinate.getNameStr());
+		System.out.println("= "+ moves );
+		System.out.println("========================================================");
+		System.out.println();
+		printBoardStatus();
+		printGamePoints();
+		System.out.println();
+	}
+
+	private void receiveChangeTernEvent(ChangeTernEvent event) {
+		TeamColor currentTeam = event.getCurrentTeam();
+		UserInfo userInfo = event.getUserInfo();
+		System.out.println("========================================================");
+		System.out.printf ("= %s(%s)のターン \n", currentTeam.getName(), userInfo.getName());
+		System.out.println("========================================================");
+		System.out.println();
+	}
+
+	private void receiveGameStartedEvent(GameStartedEvent event) {
+		TeamColor firstTeam = event.getFirstTeam();
+		UserInfo userInfo = event.getTeams().get(firstTeam);
+		System.out.println("========================================================");
+		System.out.printf ("= ゲーム開始！最初のチームは%sの%s \n", firstTeam.getName(), userInfo.getName());
+		System.out.println("========================================================");
+		System.out.println();
+		printBoardStatus();
+		printGamePoints();
+		System.out.println();
 	}
 
 	private void receiveGameFinishedEvent(GameFinishedEvent event){
@@ -105,7 +189,12 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		}else{
 			result.append("誰もゴール出来ませんでした");
 		}
-		System.out.println("ゲーム終了! 結果=>" + result);
+		System.out.println("========================================================");
+		System.out.printf ("= ゲーム終了！結果=>%s \n", result);
+		System.out.println("========================================================");
+		System.out.println();
+		printBoardStatus();
+		printGamePoints();
 		mState = State.TERMINATE;
 	}
 
@@ -294,6 +383,22 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 			e.printStackTrace();
 			return -1;
 		}
+	}
+
+	private void printBoardStatus(){
+		for(String s: mGame.getBoard().getBoadString()){
+			System.out.println(s);
+		}
+	}
+
+	private void printGamePoints(){
+		Map<TeamColor, Integer> points = new HashMap<>();
+		for(TeamColor teamColor : TeamColor.values()){
+			points.put(teamColor, mGame.getBoard().getPoint(teamColor));
+		}
+		System.out.printf("Point: 赤:%d  黄:%d  緑:%d \n", points.get(TeamColor.RED),
+												points.get(TeamColor.YELLOW),
+												points.get(TeamColor.GREEN));
 	}
 
 	@Override

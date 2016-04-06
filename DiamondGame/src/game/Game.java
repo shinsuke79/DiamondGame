@@ -4,12 +4,20 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import common.DGLog;
 import common.TeamColor;
+import game.Board.Cordinate;
 import user.User;
+import user.UserInfo;
 import user.humanUser.HumanUser;
+import view.Event.ChangeTernEvent;
 import view.Event.GameFinishedEvent;
+import view.Event.GameStartedEvent;
+import view.Event.PieceMovedEvent;
+import view.Event.PointChangedEvent;
+import view.Event.TeamReachedGoalEvent;
 import view.UserInterface;
 
 /**
@@ -111,6 +119,14 @@ public class Game {
 		mLog.info("startGame start");
 		mIsFinished = false;
 		mGameMaster.startGame();
+
+		// イベントの通知
+		EnumMap<TeamColor, UserInfo> users = new EnumMap<>(TeamColor.class);
+		for(Entry<TeamColor, User> entry : mUsers.entrySet()){
+			users.put(entry.getKey(), entry.getValue().getUserInfo());
+		}
+		mUI.notifyEvent(new GameStartedEvent(this, users, mFirstTeam));
+
 		mLog.info("startGame end");
 	}
 
@@ -127,9 +143,14 @@ public class Game {
 		for(TeamColor tc : TeamColor.values()){
 			teamPoints.put(tc, getTeamPoint(tc));
 		}
-		mUI.notifyEvent(new GameFinishedEvent(goalTeams, teamPoints));
+		mUI.notifyEvent(new GameFinishedEvent(this, goalTeams, teamPoints));
 
 		mLog.info("finishGame end");
+	}
+
+	public void pieceMoved(Move move){
+		Cordinate cordinate = mBoard.getSpotFromPiece(move.mPiece.getBasePiece()).mCordinate;
+		mUI.notifyEvent(new PieceMovedEvent(this, move.getmTeam(), move, cordinate));
 	}
 
 	/**
@@ -197,6 +218,9 @@ public class Game {
 	public void setNextTeam(TeamColor nextTeam) {
 		mLog.info("setNextTeam %s", nextTeam);
 		mCurrentTeam = nextTeam;
+
+		// イベントの送信
+		mUI.notifyEvent(new ChangeTernEvent(this, mCurrentTeam, mUsers.get(mCurrentTeam).getUserInfo()));
 	}
 
 	/**
@@ -221,6 +245,20 @@ public class Game {
 		return mGoalTeams;
 	}
 
+	public void addGoalTeam(TeamColor teamColor){
+		mLog.fine("addGoalTeam %s", teamColor);
+		assert !mGoalTeams.contains(teamColor);
+		mGoalTeams.add(teamColor);
+
+		// イベントの送信
+		ArrayList<TeamColor> goalTeams = new ArrayList<>(mGoalTeams);
+		EnumMap<TeamColor, Integer> teamPoints = new EnumMap<>(TeamColor.class);
+		for(TeamColor tc : TeamColor.values()){
+			teamPoints.put(tc, getTeamPoint(tc));
+		}
+		mUI.notifyEvent(new TeamReachedGoalEvent(this, teamPoints, mUsers.get(teamColor).getUserInfo(), teamColor, goalTeams));
+	}
+
 	public int getTeamPoint(TeamColor teamColor){
 		int teamPoint = mBoard.getGoalPieceCount(teamColor);
 		mLog.fine("getTeamPoint %s -> %d", teamColor, teamPoint);
@@ -229,5 +267,13 @@ public class Game {
 
 	public boolean isFinished() {
 		return mIsFinished;
+	}
+
+	public void updatedPoints() {
+		EnumMap<TeamColor, Integer> teamPoints = new EnumMap<>(TeamColor.class);
+		for(TeamColor tc : TeamColor.values()){
+			teamPoints.put(tc, getTeamPoint(tc));
+		}
+		mUI.notifyEvent(new PointChangedEvent(this, teamPoints));
 	}
 }

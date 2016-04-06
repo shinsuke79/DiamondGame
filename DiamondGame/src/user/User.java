@@ -180,6 +180,9 @@ public abstract class User implements Runnable {
 		return mMyOrder;
 	}
 
+	public UserInfo getUserInfo() {
+		return mUserInfo;
+	}
 
 }
 

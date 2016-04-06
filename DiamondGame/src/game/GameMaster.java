@@ -128,11 +128,12 @@ public class GameMaster implements Runnable {
 		if(!checkMove(mMove)){
 			// TODO 正しくない場合は適当な駒を１つ動かすように設定
 			// assert false;
+		}else{
+			// ボードの駒を動かす
+			Board board = mGame.getBoard();
+			board.move(mMove);
+			mGame.pieceMoved(mMove);
 		}
-
-		// ボードの駒を動かす
-		Board board = mGame.getBoard();
-		board.move(mMove);
 
 		// ボードの状態をゲームに反映させる
 		updateStatus();
@@ -167,15 +168,21 @@ public class GameMaster implements Runnable {
 	}
 
 	private void updateStatus() {
+		// ポイントが更新されたことを通知
+		updatePoints();
 		// ゴールしたチームの更新
 		updateGoalTeams();
+	}
+
+	private void updatePoints() {
+		mGame.updatedPoints();
 	}
 
 	private void updateGoalTeams() {
 		for(TeamColor tc : TeamColor.values()){
 			// ゴール済みであるにも関わらず、ゴールチーム一覧に含まれていない場合
 			if(mGame.getBoard().isFinishedTeam(tc) && !mGame.getGoalTeams().contains(tc)){
-				mGame.getGoalTeams().add(tc);
+				mGame.addGoalTeam(tc);
 			}
 		}
 		mLog.info("updateGoalTeams %s", mGame.getGoalTeams());

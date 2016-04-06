@@ -6,7 +6,7 @@ public class DGConfig {
 	/**
 	 * 本番はWARNING それ以外はALL
 	 */
-	public static Level LogLevel = Level.INFO;
+	public static Level LogLevel = Level.WARNING;
 
 	/**
 	 * １ターンあたりの制限時間
