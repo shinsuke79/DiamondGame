@@ -11,3 +11,12 @@ http://goo.gl/m3wy5S
 ## ルール・遊び方・AIの実装方法
 Wikiを参照してください  
 https://github.com/yone6379/DiamondGame/wiki
+
+## ダウンロード
+### コンソール版
+**実行ファイル**  
+[DiamondGameOnConsole.jar(120KB)](https://github.com/yone6379/DiamondGame/blob/master/DiamondGame/DiamondGameOnConsole.jar?raw=true)
+
+**必要環境**  
+* [JRE](https://java.com/ja/download/)がインストールされていること
+* PATHにJre/binが追加されていること([参考:JavaDrive](http://www.javadrive.jp/install/jdk/index4.html))
