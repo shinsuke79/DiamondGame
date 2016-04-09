@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 /**
  * DiamondGame内で使用するログです<br>
@@ -22,7 +21,7 @@ import java.util.logging.Logger;
  * @author yone
  */
 public class DGLog {
-	private Logger mLogger;
+	// private Logger mLogger;
 	private String mLogName;
 
 	public DGLog(String logName) {

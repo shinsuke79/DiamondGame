@@ -85,6 +85,9 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 		case RUNNING:
 			procInRunning();
 			break;
+		case TERMINATE:
+			// NOP
+			break;
 		}
 	}
 

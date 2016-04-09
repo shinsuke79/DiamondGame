@@ -54,10 +54,6 @@ public class HumanUser extends User {
 		mLog.info("think end result:%s", moveResult);
 	}
 
-	private boolean isUserHandIsValid(UIBoardSpot userHand, UserBoard userBoard) {
-		return false;
-	}
-
 	@Override
 	public void handShake(User handShakeUser, TeamColor teamColor) {
 		// 内部で使用するわけではないのでログだけ出しておく

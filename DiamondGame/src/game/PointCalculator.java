@@ -132,9 +132,7 @@ public class PointCalculator {
 		Cordinate p1InitCordinate = mPieceInitCordinateTable.get(p1);
 		Cordinate p2InitCordinate = mPieceInitCordinateTable.get(p2);
 
-		@SuppressWarnings("deprecation")
 		Cordinate p1CurrentCordinate = board.getSpotFromPiece(p1).mCordinate;
-		@SuppressWarnings("deprecation")
 		Cordinate p2CurrentCordinate = board.getSpotFromPiece(p2).mCordinate;
 
 		p1Distance = calcDistance(p1InitCordinate, p1CurrentCordinate);

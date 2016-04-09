@@ -189,7 +189,7 @@ public interface UserInterface {
 			Set<UiUserSpotConvMap> mTable;
 
 			public UiUserSpotConvTable() {
-				this.mTable = new HashSet();
+				this.mTable = new HashSet<>();
 				initTable();
 			}
 

@@ -128,6 +128,7 @@ public abstract class User implements Runnable {
 		mThread.start();
 	}
 
+	@SuppressWarnings("deprecation")
 	public final synchronized void stopThinking() {
 		assert mThread != null;
 		if(mThread.isAlive() && !mState.equals(State.TERMINATE)){
