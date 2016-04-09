@@ -417,13 +417,22 @@ public class ConsoleUserInterface implements UserInterface, Runnable {
 
 	@Override
 	public UIHand askHand(HumanUser humanUser, UserBoard userBoard) {
+		// 非同期の関係でPrint文が残念になるので少し遅らせる
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		// ヘッダー表示
 		System.out.println();
 		System.out.println("↓=====================================================================================↓");
 		System.out.println("★★" + humanUser.getMyTeam().getName()+"のターン★★");
 
 		// コンソールに現在の状況を表示
-		userBoard.logConsoleUserBoardImage();
+		for(String s : userBoard.logGetBoadString()){
+			System.out.println(s);
+		}
 
 		// 移動元を選択してもらう
 		System.out.println("移動元のマスを選択してください");

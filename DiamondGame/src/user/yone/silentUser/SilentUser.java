@@ -62,7 +62,24 @@ public class SilentUser extends User {
 	}
 
 	public void say(String fmt, Object... args){
-		mLog.info("無口"+getName()+"「"+fmt+"」", args);
+		mLog.info(getName()+"「"+fmt+"」", args);
+	}
+
+	public static class SilentUserInfo extends UserInfo {
+
+		public SilentUserInfo(String name) {
+			super(name);
+		}
+
+		@Override
+		public Class<? extends User> getUserClass() {
+			return SilentUser.class;
+		}
+
+		@Override
+		public String getImageUrl() {
+			return null;
+		}
 	}
 
 }

@@ -1,6 +1,6 @@
 package user;
 
-public class UserInfo {
+public abstract class UserInfo {
 	String mName;
 
 	public UserInfo(String name) {
@@ -10,6 +10,10 @@ public class UserInfo {
 	public String getName() {
 		return mName;
 	}
+
+	public abstract Class<? extends User> getUserClass();
+
+	public abstract String getImageUrl();
 
 	@Override
 	public String toString() {

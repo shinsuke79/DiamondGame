@@ -148,7 +148,7 @@ public class HillClimbingUser extends User {
 	}
 
 	public void say(String fmt, Object... args){
-		mLog.info("山登り"+getName()+"「"+fmt+"」", args);
+		mLog.info(getName()+"「"+fmt+"」", args);
 	}
 
 	@Override
@@ -186,6 +186,23 @@ public class HillClimbingUser extends User {
 			}
 			clone.parent = this;
 			return clone;
+		}
+	}
+
+	public static class HillClimbingUserInfo extends UserInfo {
+
+		public HillClimbingUserInfo(String name) {
+			super(name);
+		}
+
+		@Override
+		public Class<? extends User> getUserClass() {
+			return HillClimbingUser.class;
+		}
+
+		@Override
+		public String getImageUrl() {
+			return null;
 		}
 	}
 

@@ -35,19 +35,19 @@ public class ObakaUser extends User {
 
 	@Override
 	protected void think(UserBoard userBoard, Move moveResult) {
-		mLog.info("おばか%s「俺の番だ」", getName());
+		mLog.info("%s「俺の番だ」", getName());
 
 		// 乱数生成器
 		Random rnd = new Random();
 
 		// 移動できるはずのPieceを取得
 		List<UserPiece> movableUserPieces = new ArrayList<>(userBoard.getMovableUserPieces(getMyTeam()));
-		mLog.info("おばか%s「移動できる駒はこれか. %s」", getName(), movableUserPieces.stream()
+		mLog.info("%s「移動できる駒はこれか. %s」", getName(), movableUserPieces.stream()
 													.map((pi)->pi.getNameStr()).collect(Collectors.toList()));
 
 		// もう決めちゃう
 		UserPiece userPiece = movableUserPieces.get(rnd.nextInt(movableUserPieces.size()));
-		mLog.info("おばか%s「これにする！ %s」", getName(), userPiece.getNameStr());
+		mLog.info("%s「これにする！ %s」", getName(), userPiece.getNameStr());
 
 		// Moveに登録する
 		moveResult.mPiece = userPiece;
@@ -61,15 +61,15 @@ public class ObakaUser extends User {
 		// ぐるぐる回しながらcurrentSpotを更新していく
 		while(true){
 			if(count > 2){
-				mLog.info("おばか%s「やっぱもういいかな」", getName());
+				mLog.info("%s「やっぱもういいかな」", getName());
 				break;
 			}
 
-			mLog.info("おばか%s「%s は」", getName(), currentCordinate);
+			mLog.info("%s「%s は」", getName(), currentCordinate);
 
 			// 取得できるSpot一覧を取得
 			List<UserCordinate> movableCordinates = new ArrayList<>(userBoard.getMovableCordinates(currentCordinate, isFirst));
-			mLog.info("おばか%s「ここに移動できるのか %s」", getName(), movableCordinates);
+			mLog.info("%s「ここに移動できるのか %s」", getName(), movableCordinates);
 
 			// エラーチェック
 			if(isFirst && movableCordinates.size()==0){
@@ -78,17 +78,17 @@ public class ObakaUser extends User {
 
 			// もう移動できないなら終了
 			if(movableCordinates.size()==0){
-				mLog.info("おばか%s「ってどこにも行けないやん…」", getName());
+				mLog.info("%s「ってどこにも行けないやん…」", getName());
 				break;
 			}
 
 			// もう動かすマスを決めちゃう
 			UserCordinate nextUserCordinate = movableCordinates.get(rnd.nextInt(movableCordinates.size()));
-			mLog.info("おばか%s「これにする！ %s」", getName(), nextUserCordinate);
+			mLog.info("%s「これにする！ %s」", getName(), nextUserCordinate);
 
 			// 移動元に戻っちゃうようならその場で打ち切り
 			if(firstCordinate.equals(nextUserCordinate) || moveResult.mMoveSpots.contains(nextUserCordinate)){
-				mLog.info("おばか%s「ここ移動したとこだわ…」", getName());
+				mLog.info("%s「ここ移動したとこだわ…」", getName());
 				break;
 			}
 
@@ -107,10 +107,10 @@ public class ObakaUser extends User {
 			isFirst = false;
 			count++;
 
-			mLog.info("おばか%s「もう一回考えてみるか」", getName());
+			mLog.info("%s「もう一回考えてみるか」", getName());
 		}
 
-		mLog.info("おばか%s「こんなもんかな」", getName());
+		mLog.info("%s「こんなもんかな」", getName());
 	}
 
 	@Override
@@ -121,6 +121,23 @@ public class ObakaUser extends User {
 	@Override
 	public void notifyCancelled() {
 		// 何も蓄えていないので何もしない
+	}
+
+	public static class ObakaUserInfo extends UserInfo {
+
+		public ObakaUserInfo(String name) {
+			super(name);
+		}
+
+		@Override
+		public Class<? extends User> getUserClass() {
+			return ObakaUser.class;
+		}
+
+		@Override
+		public String getImageUrl() {
+			return null;
+		}
 	}
 
 }

@@ -81,4 +81,21 @@ public class HumanUser extends User {
 		mUI = ui;
 	}
 
+	public static class HumanUserInfo extends UserInfo {
+
+		public HumanUserInfo(String name) {
+			super(name);
+		}
+
+		@Override
+		public Class<? extends User> getUserClass() {
+			return HumanUser.class;
+		}
+
+		@Override
+		public String getImageUrl() {
+			return null;
+		}
+	}
+
 }

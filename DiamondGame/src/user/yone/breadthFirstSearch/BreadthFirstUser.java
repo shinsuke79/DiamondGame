@@ -204,11 +204,11 @@ public class BreadthFirstUser extends User {
 	}
 
 	public void say(String fmt, Object... args){
-		mLog.info("優柔不断"+getName()+"「"+fmt+"」", args);
+		mLog.info(getName()+"「"+fmt+"」", args);
 	}
 
 	public void tweet(String fmt, Object... args){
-		mLog.fine("優柔不断"+getName()+"「"+fmt+"」", args);
+		mLog.fine(getName()+"「"+fmt+"」", args);
 	}
 
 	/**
@@ -336,6 +336,23 @@ public class BreadthFirstUser extends User {
 			System.out.printf("Min Time:%dMsec \n", timeList.stream().mapToLong((t)->t).min().getAsLong());
 			System.out.printf("Average :%dMsec \n", (long)timeList.stream().mapToDouble((t)->t).average().getAsDouble());
 			*/
+		}
+	}
+
+	public static class BreadthFirstUserInfo extends UserInfo {
+
+		public BreadthFirstUserInfo(String name) {
+			super(name);
+		}
+
+		@Override
+		public Class<? extends User> getUserClass() {
+			return BreadthFirstUser.class;
+		}
+
+		@Override
+		public String getImageUrl() {
+			return null;
 		}
 	}
 }

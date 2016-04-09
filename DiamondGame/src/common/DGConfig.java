@@ -17,5 +17,5 @@ public class DGConfig {
 	 * コンソールでのデバッグのためにユーザー
 	 * 入力を省略するか
 	 */
-	public static boolean SmoothDebugOnConsole = true;
+	public static boolean SmoothDebugOnConsole = false;
 }
