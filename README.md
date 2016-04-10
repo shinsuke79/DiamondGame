@@ -1,5 +1,5 @@
 # DiamondGame
-DiamondGameは一度は見たことがあるボードゲーム「ダイアモンドゲーム(Chinese Checkers)」のシミュレータです。  
+ボードゲーム「ダイアモンドゲーム(Chinese Checkers)」のシミュレータです。  
 AIを作成し、自分が作ったAIと対戦したり、AI同士を対戦させたりできます。  
 
 ## ダイアモンドゲームについて
