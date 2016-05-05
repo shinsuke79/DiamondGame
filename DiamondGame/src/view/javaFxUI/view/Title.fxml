@@ -20,7 +20,7 @@
                   <Font name="Arial Black" size="56.0" />
                </font>
             </Label>
-            <Button layoutX="568.0" layoutY="445.0" mnemonicParsing="false" text="StartGame" AnchorPane.bottomAnchor="239.0" AnchorPane.leftAnchor="568.0" AnchorPane.rightAnchor="568.0" AnchorPane.topAnchor="445.0">
+            <Button fx:id="startButton" layoutX="568.0" layoutY="445.0" mnemonicParsing="false" text="StartGame" AnchorPane.bottomAnchor="239.0" AnchorPane.leftAnchor="568.0" AnchorPane.rightAnchor="568.0" AnchorPane.topAnchor="445.0">
                <font>
                   <Font size="24.0" />
                </font>

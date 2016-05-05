@@ -25,11 +25,7 @@ public class JavaFX extends Application {
 
 		FXMLLoader fxmlLoader = new FXMLLoader(FxResouceMgr.GetViewUrl("Title.fxml"));
 
-		try {
-			changeScene(fxmlLoader, null);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		changeScene(fxmlLoader, null);
 	}
 
 	public static JavaFX getInstance(){
@@ -37,8 +33,14 @@ public class JavaFX extends Application {
 		return Instance;
 	}
 
-	public void changeScene(FXMLLoader loader, Map<String, Object> option) throws IOException{
-		Pane pane = loader.load();
+	public void changeScene(FXMLLoader loader, Map<String, Object> option){
+		Pane pane = null;
+		try {
+			pane = loader.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
 		Scene scene = new Scene(pane);
 
 		Object controller = loader.getController();
