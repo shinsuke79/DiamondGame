@@ -80,6 +80,11 @@ public class SilentUser extends User {
 		public String getImageUrl() {
 			return null;
 		}
+
+		@Override
+		public String getDescription() {
+			return "何もしないユーザー";
+		}
 	}
 
 }

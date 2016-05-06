@@ -92,6 +92,11 @@ public class HumanUser extends User {
 		public String getImageUrl() {
 			return null;
 		}
+
+		@Override
+		public String getDescription() {
+			return "ユーザーが操作できるユーザ";
+		}
 	}
 
 }

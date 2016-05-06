@@ -27,7 +27,7 @@ import user.UserInfo;
 public class BreadthFirstUser extends User {
 
 	private DGLog mLog;
-	private final int EXACT_LIMIT = 2;
+	static final int EXACT_LIMIT = 2;
 
 	public BreadthFirstUser(UserInfo userInfo) {
 		super(userInfo);
@@ -353,6 +353,11 @@ public class BreadthFirstUser extends User {
 		@Override
 		public String getImageUrl() {
 			return null;
+		}
+
+		@Override
+		public String getDescription() {
+			return "幅優先探索を使用したユーザー. "+BreadthFirstUser.EXACT_LIMIT + "手先まで読みます";
 		}
 	}
 }

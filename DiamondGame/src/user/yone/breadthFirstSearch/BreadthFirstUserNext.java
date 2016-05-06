@@ -27,7 +27,7 @@ import user.UserInfo;
 public class BreadthFirstUserNext extends User {
 
 	private DGLog mLog;
-	private final int    EXACT_LIMIT = 3;
+	private static final int    EXACT_LIMIT = 3;
 	/**
 	 * OpenListに新たなノードを追加する際に比較対象のhnに反映させる係数
 	 * 小さくすればパフォーマンスは下がるが探索の幅が広がる
@@ -368,6 +368,11 @@ public class BreadthFirstUserNext extends User {
 		@Override
 		public String getImageUrl() {
 			return null;
+		}
+
+		@Override
+		public String getDescription() {
+			return "幅優先探索の改良版. "+ BreadthFirstUserNext.EXACT_LIMIT + "手先まで読みます";
 		}
 	}
 }

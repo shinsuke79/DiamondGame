@@ -15,6 +15,8 @@ public abstract class UserInfo {
 
 	public abstract String getImageUrl();
 
+	public abstract String getDescription();
+
 	@Override
 	public String toString() {
 		return "UserInfo [mName=" + mName + "]";

@@ -33,6 +33,11 @@ public class JavaFX extends Application {
 		return Instance;
 	}
 
+	public void changeScene(String viewFxmlName, Map<String, Object> option){
+		FXMLLoader loader = new FXMLLoader(FxResouceMgr.GetViewUrl(viewFxmlName));
+		changeScene(loader, option);
+	}
+
 	public void changeScene(FXMLLoader loader, Map<String, Object> option){
 		Pane pane = null;
 		try {

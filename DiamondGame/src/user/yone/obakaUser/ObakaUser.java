@@ -138,6 +138,11 @@ public class ObakaUser extends User {
 		public String getImageUrl() {
 			return null;
 		}
+
+		@Override
+		public String getDescription() {
+			return "とにかくランダムで一手を決めるお馬鹿なユーザー";
+		}
 	}
 
 }

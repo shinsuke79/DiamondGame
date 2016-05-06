@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import main.JavaFX;
 import view.javaFxUI.DGFxControl;
+import view.javaFxUI.FxResouceMgr;
 
 public class TitleControl implements Initializable, DGFxControl {
 	@FXML Button startButton;
@@ -20,8 +22,9 @@ public class TitleControl implements Initializable, DGFxControl {
 			startButton.setDisable(true);
 
 			// 次の画面へ遷移
+			FXMLLoader gameConfigLoader = new FXMLLoader(FxResouceMgr.GetViewUrl("GameConfig.fxml"));
 			JavaFX instance = JavaFX.getInstance();
-			// instance.changeScene(new FXMLLoader(), null);
+			instance.changeScene(gameConfigLoader, null);
 		});
 	}
 

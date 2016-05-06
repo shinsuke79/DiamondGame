@@ -204,6 +204,11 @@ public class HillClimbingUser extends User {
 		public String getImageUrl() {
 			return null;
 		}
+
+		@Override
+		public String getDescription() {
+			return "山登り法を使用したユーザー.";
+		}
 	}
 
 }

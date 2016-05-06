@@ -1,0 +1,14 @@
+.GameConfigTitle {
+	-fx-font-size: 25px;
+	-fx-label-padding: 5 0 5 0;
+	-fx-font-weight: bold;
+}
+
+.GameConfigHeader {
+	-fx-label-padding: 7 0 2 0;
+	-fx-font-size: 15px;
+}
+
+.GameConfigUserSellect {
+	-fx-pref-height: 100;
+}
