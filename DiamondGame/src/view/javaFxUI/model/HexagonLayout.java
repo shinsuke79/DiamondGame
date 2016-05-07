@@ -5,6 +5,11 @@ import java.util.List;
 
 import javafx.scene.shape.Polygon;
 
+/**
+ * 仮想画面に配置される六角形の座標情報群
+ * @author yone
+ *
+ */
 public class HexagonLayout {
 	/**
 	 * 頂点の数(固定)
@@ -43,9 +48,11 @@ public class HexagonLayout {
 	 * @return
 	 */
 	public HexagonLayout(CreateType createType, FxCord cord, FxDur xDur, FxDur yDur) {
+		// Durationはそのまま代入
 		xDuration = xDur;
 		yDuration = yDur;
 
+		// CreateType毎に中心座標を求める
 		if(createType == CreateType.CENTER){
 			centerCord = cord;
 		}else if(createType == CreateType.LEFT_UPPER){
@@ -55,6 +62,7 @@ public class HexagonLayout {
 					);
 		}
 
+		// 六角形の頂点の座標(係数)を使用して指定された大きさの六角形を作成する
 		PolygonCoefficient coefficient = PolygonCoefficient.getPolygonCoefficient(APEX_NUM);
 		for(int i=0; i<coefficient.apexNum; i++){
 			double xCoff = coefficient.x[i];

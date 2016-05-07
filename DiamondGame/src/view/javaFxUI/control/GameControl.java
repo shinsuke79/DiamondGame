@@ -44,6 +44,9 @@ public class GameControl implements Initializable, DGFxControl {
 		Polygon hexagon = hexagonLayout.getPolygonAsPixcel();
 		hexagon.setFill(Color.TRANSPARENT);
 		hexagon.setStroke(Color.DARKBLUE);
+
+		hexagon.setOnMouseClicked((value)-> System.out.println("hexagonClicked"));
+
 		rootPane.getChildren().add(hexagon);
 	}
 
