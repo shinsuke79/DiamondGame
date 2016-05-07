@@ -1,7 +1,6 @@
 package view.javaFxUI.control;
 
 import java.net.URL;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.fxml.FXML;
@@ -9,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import main.JavaFX;
+import view.javaFxUI.ControlOption;
 import view.javaFxUI.DGFxControl;
 import view.javaFxUI.FxResouceMgr;
 
@@ -29,7 +29,13 @@ public class TitleControl implements Initializable, DGFxControl {
 	}
 
 	@Override
-	public void setOption(Map<String, Object> option) {
+	public void setOption(ControlOption option) {
+		// NOP
+	}
+
+	@Override
+	public void onShown() {
+		// NOP
 	}
 
 }

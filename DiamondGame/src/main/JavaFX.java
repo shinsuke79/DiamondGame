@@ -1,13 +1,13 @@
 package main;
 
 import java.io.IOException;
-import java.util.Map;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import view.javaFxUI.ControlOption;
 import view.javaFxUI.DGFxControl;
 import view.javaFxUI.FxResouceMgr;
 
@@ -33,12 +33,12 @@ public class JavaFX extends Application {
 		return Instance;
 	}
 
-	public void changeScene(String viewFxmlName, Map<String, Object> option){
+	public void changeScene(String viewFxmlName, ControlOption option){
 		FXMLLoader loader = new FXMLLoader(FxResouceMgr.GetViewUrl(viewFxmlName));
 		changeScene(loader, option);
 	}
 
-	public void changeScene(FXMLLoader loader, Map<String, Object> option){
+	public void changeScene(FXMLLoader loader, ControlOption option){
 		Pane pane = null;
 		try {
 			pane = loader.load();
@@ -55,6 +55,10 @@ public class JavaFX extends Application {
 
 		mStage.setScene(scene);
 		mStage.show();
+
+		if(controller instanceof DGFxControl){
+			((DGFxControl) controller).onShown();
+		}
 	}
 
 	public static void main(String[] args) {

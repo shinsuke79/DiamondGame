@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import common.TeamColor;
@@ -20,6 +19,7 @@ import javafx.util.Callback;
 import main.JavaFX;
 import user.UserInfo;
 import user.UserManager;
+import view.javaFxUI.ControlOption;
 import view.javaFxUI.DGFxControl;
 
 public class GameConfigControl implements Initializable, DGFxControl {
@@ -38,7 +38,8 @@ public class GameConfigControl implements Initializable, DGFxControl {
 	}
 
 	@Override
-	public void setOption(Map<String, Object> option) {
+	public void setOption(ControlOption option) {
+		// TODO 別の画面から戻ってくる場合はここでGameConfigの値をUIに反映させる
 	}
 
 	@Override
@@ -78,8 +79,9 @@ public class GameConfigControl implements Initializable, DGFxControl {
 			startButton.setDisable(true);
 			if(checkUserInput()){
 				// 次の画面へ
-				GameConfig config = createGameConfig();
-				System.out.println(config);
+				ControlOption option = new ControlOption();
+				option.setValue(ControlOption.ValueId.GAME_CONFIG, createGameConfig());
+				JavaFX.getInstance().changeScene("Game.fxml", option);
 			}else{
 				// 選択に失敗した->再度ボタンが押せるか確認する
 				startButton.setDisable(!checkUserInput());
@@ -125,5 +127,10 @@ public class GameConfigControl implements Initializable, DGFxControl {
 				setTooltip(new Tooltip(item.getDescription()));
 			}
 		}
+	}
+
+	@Override
+	public void onShown() {
+		// NOP
 	}
 }
