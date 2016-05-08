@@ -5,10 +5,10 @@ package view.javaFxUI.model;
  * @author yone
  *
  */
-public class FxCord {
+public class FxCord extends FxObject {
 	double x, y;
-	public FxCord(double x, double y) {
-		super();
+	public FxCord(double x, double y, Tag...tags) {
+		super(tags);
 		this.x = x;
 		this.y = y;
 	}

@@ -1,21 +1,21 @@
 package view.javaFxUI.control;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import game.GameConfig;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Polygon;
 import view.javaFxUI.ControlOption;
 import view.javaFxUI.ControlOption.ValueId;
 import view.javaFxUI.DGFxControl;
 import view.javaFxUI.model.FxCord;
 import view.javaFxUI.model.FxDur;
-import view.javaFxUI.model.HexagonLayout;
 import view.javaFxUI.model.HexagonLayout.CreateType;
+import view.javaFxUI.model.StarInHexagonLayout;
 
 public class GameControl implements Initializable, DGFxControl {
 	GameConfig mGameConfig;
@@ -35,19 +35,16 @@ public class GameControl implements Initializable, DGFxControl {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		HexagonLayout hexagonLayout = new HexagonLayout(
+		StarInHexagonLayout starLayout = new StarInHexagonLayout(
 				CreateType.LEFT_UPPER,
 				new FxCord(0, 20),
 				new FxDur(680),
 				new FxDur(680)
 				);
-		Polygon hexagon = hexagonLayout.getPolygonAsPixcel();
-		hexagon.setFill(Color.TRANSPARENT);
-		hexagon.setStroke(Color.DARKBLUE);
-
-		hexagon.setOnMouseClicked((value)-> System.out.println("hexagonClicked"));
-
-		rootPane.getChildren().add(hexagon);
+		List<Node> nodes = starLayout.getNodes();
+		for(Node n : nodes){
+			rootPane.getChildren().add(n);
+		}
 	}
 
 	@Override

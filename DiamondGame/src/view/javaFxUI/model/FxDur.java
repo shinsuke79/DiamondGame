@@ -5,13 +5,13 @@ package view.javaFxUI.model;
  * @author yone
  *
  */
-public class FxDur {
+public class FxDur extends FxObject {
 	double d;
-	public FxDur(int d) {
-		super();
+	public FxDur(double d, Tag...tags) {
+		super(tags);
 		this.d = d;
 	}
-	public double getDuration() {
+	public double getValue() {
 		return d;
 	}
 	public double getPixcelDuration() {

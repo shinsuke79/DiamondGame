@@ -12,3 +12,13 @@
 .GameConfigUserSellect {
 	-fx-pref-height: 100;
 }
+
+.Polygon {
+    -fx-fill: transparent;
+    -fx-stroke: darkgray;
+}
+
+.StarLine{
+    -fx-fill: transparent;
+    -fx-stroke: darkcyan;
+}
