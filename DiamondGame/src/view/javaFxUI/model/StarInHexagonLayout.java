@@ -1,6 +1,9 @@
 package view.javaFxUI.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Line;
@@ -9,7 +12,7 @@ import view.javaFxUI.model.FxObject.Tag;
 public class StarInHexagonLayout extends HexagonLayout {
 	private ArrayFxObjectList<FxLine> mOutLines;
 	private ArrayFxObjectList<FxLine> mStarLines;
-	private ArrayFxObjectList<FxLine> mXMatrix;
+	private Map<XYZ, ArrayFxObjectList<FxLine>> mMatrix;
 
 	public StarInHexagonLayout(CreateType createType, FxCord cord, FxDur xDur, FxDur yDur) {
 		super(createType, cord, xDur, yDur);
@@ -77,12 +80,21 @@ public class StarInHexagonLayout extends HexagonLayout {
 				mOutLines.findByTags(Tag.END_Y).getFxCordOnLine(2, 1),
 				Tag.END_Z, Tag.STAR_LEFT));
 
-		mXMatrix = new ArrayFxObjectList<>();
-		Tag startLineTag       = Tag.START_X;
+		/* XYZそれぞれのMtrixを作成 */
+		mMatrix = new HashMap<>();
+		mMatrix.put(XYZ.X, createMatrixLines(Tag.START_X));
+		mMatrix.put(XYZ.Y, createMatrixLines(Tag.START_Y));
+		mMatrix.put(XYZ.Z, createMatrixLines(Tag.START_Z));
+	}
+
+	private ArrayFxObjectList<FxLine> createMatrixLines(Tag startLineTag) {
+		ArrayFxObjectList<FxLine> ret = new ArrayFxObjectList<>();
+
 		Tag firstRightLineTag  = FxLine.getTagUsingDirection(startLineTag, 1);
 		Tag firstLeftLineTag   = FxLine.getTagUsingDirection(startLineTag, -1);
 		Tag secondRightLineTag = FxLine.getTagUsingDirection(startLineTag, 2);
 		Tag secondLeftLineTag  = FxLine.getTagUsingDirection(startLineTag, -2);
+
 		FxLine firstRightLine = mOutLines.findByTags(firstRightLineTag);
 		FxLine firstLeftLine  = mOutLines.findByTags(firstLeftLineTag).getReverseLine();
 		for(int i=0; i<=6; i++){
@@ -90,8 +102,20 @@ public class StarInHexagonLayout extends HexagonLayout {
 					firstLeftLine.getFxCordOnLine(6, i),
 					firstRightLine.getFxCordOnLine(6, i)
 					);
-			mXMatrix.add(line);
+			ret.add(line);
 		}
+
+		FxLine secondRightLine = mOutLines.findByTags(secondRightLineTag);
+		FxLine secondLeftLine  = mOutLines.findByTags(secondLeftLineTag).getReverseLine();
+		for(int i=1; i<=6; i++){
+			FxLine line = new FxLine(
+					secondLeftLine.getFxCordOnLine(6, i),
+					secondRightLine.getFxCordOnLine(6, i)
+					);
+			ret.add(line);
+		}
+
+		return ret;
 	}
 
 	@Override
@@ -102,11 +126,19 @@ public class StarInHexagonLayout extends HexagonLayout {
 			starLineShape.getStyleClass().add("StarLine");
 			nodes.add(starLineShape);
 		}
-		for(FxLine l : mXMatrix){
-			Line xMatrixLineShape = l.createLineShape();
-			xMatrixLineShape.getStyleClass().add("XMatrixLine");
-			nodes.add(xMatrixLineShape);
+		for(Entry<XYZ, ArrayFxObjectList<FxLine>>  entry : mMatrix.entrySet()){
+			for(FxLine line : entry.getValue()){
+				Line lineShape = line.createLineShape();
+				lineShape.getStyleClass().add(entry.getKey()+"MatrixLine");
+				nodes.add(lineShape);
+			}
 		}
 		return nodes;
+	}
+
+	public static enum XYZ {
+		X,
+		Y,
+		Z
 	}
 }

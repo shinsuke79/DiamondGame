@@ -21,4 +21,20 @@
 .StarLine{
     -fx-fill: transparent;
     -fx-stroke: darkcyan;
+    -fx-stroke-width: 2;
+}
+
+.XMatrixLine{
+	-fx-stroke: lightcoral;
+	-fx-stroke-width: 0.5;
+}
+
+.YMatrixLine{
+	-fx-stroke: darkcyan;
+	-fx-stroke-width: 0.5;
+}
+
+.ZMatrixLine{
+	-fx-stroke: khaki;
+	-fx-stroke-width: 0.5;
 }
