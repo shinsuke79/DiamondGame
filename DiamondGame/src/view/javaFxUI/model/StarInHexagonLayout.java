@@ -7,12 +7,14 @@ import java.util.Map.Entry;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Text;
 import view.javaFxUI.model.FxObject.Tag;
 
 public class StarInHexagonLayout extends HexagonLayout {
 	private ArrayFxObjectList<FxLine> mOutLines;
 	private ArrayFxObjectList<FxLine> mStarLines;
 	private Map<XYZ, ArrayFxObjectList<FxLine>> mMatrix;
+	private FxCord mCords[][][];
 
 	public StarInHexagonLayout(CreateType createType, FxCord cord, FxDur xDur, FxDur yDur) {
 		super(createType, cord, xDur, yDur);
@@ -85,6 +87,16 @@ public class StarInHexagonLayout extends HexagonLayout {
 		mMatrix.put(XYZ.X, createMatrixLines(Tag.START_X));
 		mMatrix.put(XYZ.Y, createMatrixLines(Tag.START_Y));
 		mMatrix.put(XYZ.Z, createMatrixLines(Tag.START_Z));
+
+		/* 交点の座標を作成する */
+		mCords = new FxCord[13][13][13];
+		for(int x=0; x<13; x++){
+			for(int y=0; y<13; y++){
+				for(int z=0; z<13; z++){
+					mCords[x][y][z] = getFxCord(x, y, z);
+				}
+			}
+		}
 	}
 
 	private ArrayFxObjectList<FxLine> createMatrixLines(Tag startLineTag) {
@@ -133,7 +145,31 @@ public class StarInHexagonLayout extends HexagonLayout {
 				nodes.add(lineShape);
 			}
 		}
+
+		for(int x=0; x<13; x++){
+			for(int y=0; y<13; y++){
+				for(int z=0; z<13; z++){
+					FxCord fxCord = mCords[x][y][z];
+					Text text = new Text(fxCord.x, fxCord.y, x+","+y+","+z);
+					nodes.add(text);
+				}
+			}
+		}
 		return nodes;
+	}
+
+	public FxCord getFxCord(int x, int y, int z){
+		assert 0 <= x && x <= 12;
+		assert 0 <= y && y <= 12;
+		assert 0 <= z && z <= 12;
+
+		FxLine fxLineX = mMatrix.get(XYZ.X).get(x);
+		FxLine fxLineY = mMatrix.get(XYZ.Y).get(y);
+		FxLine fxLineZ = mMatrix.get(XYZ.Z).get(z);
+
+		// XとYの交点から座標を求める
+		FxCord ret = fxLineX.getIntersection(fxLineY);
+		return ret;
 	}
 
 	public static enum XYZ {
