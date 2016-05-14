@@ -15,7 +15,9 @@ public class FxDur extends FxObject {
 		return d;
 	}
 	public double getPixcelDuration() {
-		return d*1; // TODO Panelのサイズと仮想画面のサイズを変える場合は係数をかける必要あり
+		// TODO Panelのサイズと仮想画面のサイズを変える場合は係数をかける必要あり
+		// あとベクトルじゃないと係数が定まらない
+		return d*1;
 	}
 	@Override
 	public String toString() {

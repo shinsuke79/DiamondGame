@@ -14,6 +14,7 @@ import view.javaFxUI.ControlOption.ValueId;
 import view.javaFxUI.DGFxControl;
 import view.javaFxUI.model.FxCord;
 import view.javaFxUI.model.FxDur;
+import view.javaFxUI.model.GameBoardLayout;
 import view.javaFxUI.model.HexagonLayout.CreateType;
 import view.javaFxUI.model.StarInHexagonLayout;
 
@@ -35,7 +36,7 @@ public class GameControl implements Initializable, DGFxControl {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		StarInHexagonLayout starLayout = new StarInHexagonLayout(
+		StarInHexagonLayout starLayout = new GameBoardLayout(
 				CreateType.LEFT_UPPER,
 				new FxCord(0, 20),
 				new FxDur(680),

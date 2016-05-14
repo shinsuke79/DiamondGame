@@ -1,20 +1,20 @@
 package view.javaFxUI.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javafx.scene.Node;
 import javafx.scene.shape.Line;
-import javafx.scene.text.Text;
 import view.javaFxUI.model.FxObject.Tag;
 
 public class StarInHexagonLayout extends HexagonLayout {
-	private ArrayFxObjectList<FxLine> mOutLines;
-	private ArrayFxObjectList<FxLine> mStarLines;
-	private Map<XYZ, ArrayFxObjectList<FxLine>> mMatrix;
-	private FxCord mCords[][][];
+	protected ArrayFxObjectList<FxLine> mOutLines;
+	protected ArrayFxObjectList<FxLine> mStarLines;
+	protected Map<XYZ, ArrayFxObjectList<FxLine>> mMatrix;
+	protected FxCord mCords[][][];
+	protected List<Line> mStarLineShapes;
 
 	public StarInHexagonLayout(CreateType createType, FxCord cord, FxDur xDur, FxDur yDur) {
 		super(createType, cord, xDur, yDur);
@@ -97,6 +97,13 @@ public class StarInHexagonLayout extends HexagonLayout {
 				}
 			}
 		}
+
+		mStarLineShapes = new ArrayList<>();
+		for(FxLine l : mStarLines){
+			Line starLineShape = l.createLineShape();
+			starLineShape.getStyleClass().add("StarLine");
+			mStarLineShapes.add(starLineShape);
+		}
 	}
 
 	private ArrayFxObjectList<FxLine> createMatrixLines(Tag startLineTag) {
@@ -133,11 +140,11 @@ public class StarInHexagonLayout extends HexagonLayout {
 	@Override
 	public List<Node> getNodes() {
 		List<Node> nodes = super.getNodes();
-		for(FxLine l : mStarLines){
-			Line starLineShape = l.createLineShape();
-			starLineShape.getStyleClass().add("StarLine");
-			nodes.add(starLineShape);
+		for(Line node : mStarLineShapes){
+			nodes.add(node);
 		}
+
+		/*
 		for(Entry<XYZ, ArrayFxObjectList<FxLine>>  entry : mMatrix.entrySet()){
 			for(FxLine line : entry.getValue()){
 				Line lineShape = line.createLineShape();
@@ -145,7 +152,9 @@ public class StarInHexagonLayout extends HexagonLayout {
 				nodes.add(lineShape);
 			}
 		}
+		*/
 
+		/*
 		for(int x=0; x<13; x++){
 			for(int y=0; y<13; y++){
 				for(int z=0; z<13; z++){
@@ -155,6 +164,7 @@ public class StarInHexagonLayout extends HexagonLayout {
 				}
 			}
 		}
+		*/
 		return nodes;
 	}
 

@@ -1,5 +1,7 @@
 package view.javaFxUI.model;
 
+import javafx.scene.shape.Circle;
+
 /**
  * 仮想上の座標
  * @author yone
@@ -27,5 +29,9 @@ public class FxCord extends FxObject {
 	@Override
 	public String toString() {
 		return "FxCord [x=" + x + ", y=" + y + "]";
+	}
+	public Circle createCircleShape(FxDur radius) {
+		Circle ret = new Circle(getPixelX(), getPixelY(), radius.getPixcelDuration());
+		return ret;
 	}
 }

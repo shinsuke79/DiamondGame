@@ -15,6 +15,12 @@ public class FxObject {
 		END_Z,
 		STAR_RIGHT,
 		STAR_LEFT,
+		START_RED,
+		START_YELLOW,
+		START_GREEN,
+		END_RED,
+		END_YELLOW,
+		END_GREEN,
 	}
 
 	public FxObject(Tag... tags) {

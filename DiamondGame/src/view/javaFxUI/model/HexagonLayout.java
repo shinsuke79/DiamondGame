@@ -19,23 +19,23 @@ public class HexagonLayout {
 	/**
 	 * 頂点の仮想座標
 	 */
-	List<FxCord> mApexCord = new ArrayList<>();
+	protected List<FxCord> mApexCord = new ArrayList<>();
 	/**
 	 * 中心の仮想座標
 	 */
-	FxCord mCenterCord;
+	protected FxCord mCenterCord;
 	/**
 	 * X軸の仮想長さ
 	 */
-	FxDur mXDur;
+	protected FxDur mXDur;
 	/**
 	 * Y軸の仮想長さ
 	 */
-	FxDur mYDur;
+	protected FxDur mYDur;
 	/**
 	 * 保有しているPolygon
 	 */
-	Polygon mPolygon;
+	protected Polygon mPolygon;
 
 	/**
 	 * 	Rectangleと同様の指定方法で六角形情報を作成する

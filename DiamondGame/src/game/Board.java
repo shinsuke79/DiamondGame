@@ -2,6 +2,7 @@ package game;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -887,6 +888,105 @@ public class Board implements Cloneable {
 		public String getNameStr(){
 			return "[" + x + ", " + y + ", " + z + "]";
 		}
+	}
+
+	private static final List<Cordinate> spotCordinates = createSpotCordinates();
+	public static List<Cordinate> createSpotCordinates() {
+		List<Cordinate> ret = new ArrayList<>();
+
+		// x=0
+		ret.add(new Cordinate(0,9,9));
+		// x=1
+		ret.add(new Cordinate(1,9,8));
+		ret.add(new Cordinate(1,8,9));
+		// x=2
+		ret.add(new Cordinate(2,9,7));
+		ret.add(new Cordinate(2,8,8));
+		ret.add(new Cordinate(2,7,9));
+		// x=3
+		ret.add(new Cordinate(3,12,3));
+		ret.add(new Cordinate(3,11,4));
+		ret.add(new Cordinate(3,10,5));
+		ret.add(new Cordinate(3,9,6));
+		ret.add(new Cordinate(3,8,7));
+		ret.add(new Cordinate(3,7,8));
+		ret.add(new Cordinate(3,6,9));
+		ret.add(new Cordinate(3,5,10));
+		ret.add(new Cordinate(3,4,11));
+		ret.add(new Cordinate(3,3,12));
+		// x=4
+		ret.add(new Cordinate(4,11,3));
+		ret.add(new Cordinate(4,10,4));
+		ret.add(new Cordinate(4,9,5));
+		ret.add(new Cordinate(4,8,6));
+		ret.add(new Cordinate(4,7,7));
+		ret.add(new Cordinate(4,6,8));
+		ret.add(new Cordinate(4,5,9));
+		ret.add(new Cordinate(4,4,10));
+		ret.add(new Cordinate(4,3,11));
+		// x=5
+		ret.add(new Cordinate(5,10,3));
+		ret.add(new Cordinate(5,9,4));
+		ret.add(new Cordinate(5,8,5));
+		ret.add(new Cordinate(5,7,6));
+		ret.add(new Cordinate(5,6,7));
+		ret.add(new Cordinate(5,5,8));
+		ret.add(new Cordinate(5,4,9));
+		ret.add(new Cordinate(5,3,10));
+		// x=6
+		ret.add(new Cordinate(6,9,3));
+		ret.add(new Cordinate(6,8,4));
+		ret.add(new Cordinate(6,7,5));
+		ret.add(new Cordinate(6,6,6));
+		ret.add(new Cordinate(6,5,7));
+		ret.add(new Cordinate(6,4,8));
+		ret.add(new Cordinate(6,3,9));
+		// x=7
+		ret.add(new Cordinate(7,9,2));
+		ret.add(new Cordinate(7,8,3));
+		ret.add(new Cordinate(7,7,4));
+		ret.add(new Cordinate(7,6,5));
+		ret.add(new Cordinate(7,5,6));
+		ret.add(new Cordinate(7,4,7));
+		ret.add(new Cordinate(7,3,8));
+		ret.add(new Cordinate(7,2,9));
+		// x=8
+		ret.add(new Cordinate(8,9,1));
+		ret.add(new Cordinate(8,8,2));
+		ret.add(new Cordinate(8,7,3));
+		ret.add(new Cordinate(8,6,4));
+		ret.add(new Cordinate(8,5,5));
+		ret.add(new Cordinate(8,4,6));
+		ret.add(new Cordinate(8,3,7));
+		ret.add(new Cordinate(8,2,8));
+		ret.add(new Cordinate(8,1,9));
+		// x=9
+		ret.add(new Cordinate(9,9,0));
+		ret.add(new Cordinate(9,8,1));
+		ret.add(new Cordinate(9,7,2));
+		ret.add(new Cordinate(9,6,3));
+		ret.add(new Cordinate(9,5,4));
+		ret.add(new Cordinate(9,4,5));
+		ret.add(new Cordinate(9,3,6));
+		ret.add(new Cordinate(9,2,7));
+		ret.add(new Cordinate(9,1,8));
+		ret.add(new Cordinate(9,0,9));
+		// x=10
+		ret.add(new Cordinate(10,5,3));
+		ret.add(new Cordinate(10,4,4));
+		ret.add(new Cordinate(10,3,5));
+		// x=11
+		ret.add(new Cordinate(11,4,3));
+		ret.add(new Cordinate(11,3,4));
+		// x=12
+		ret.add(new Cordinate(12,3,3));
+
+		// 編集不可リスト
+		return Collections.unmodifiableList(ret);
+	}
+
+	public static List<Cordinate> getSpotCordinates() {
+		return spotCordinates;
 	}
 
 }
